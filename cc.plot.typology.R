@@ -261,6 +261,8 @@ typology.data()
 
 run.typology <- function( ){
   
+  setwd(cc.typ.dir)
+  
     # Typology sample selection
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # T.df <- T.df[ !is.na(T.df$Biomass.C.dens.total.litter.Mg) & T.df$Biomass.C.dens.total.litter.Mg < 100,]
