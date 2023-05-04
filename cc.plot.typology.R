@@ -121,6 +121,8 @@ system.summmary <- function(){
 
 typology.data <- function(){
   
+  setwd(main.dir) 
+  
    bioclim <- readOGR("Spatial_data/bioclimatic_data.shp")
    
   
@@ -143,8 +145,6 @@ typology.data <- function(){
                # Yield variables
                'cc_yield_fn_Mg_per_ha',
                'yld_pc_attain_plot',
-              # 'yld.pc.attainable',
-               'yld.pc.attainable.adj',
                # Practices
                'weeds_per_year',
                'prunes_per_year',
@@ -197,39 +197,38 @@ typology.data <- function(){
                'quant.paths.viral',
                'quant.paths.bacterial',
                'quant.paths.insect',
-               'paths.bool.cssvd',
-               'paths.bool.capsd',
-               'paths.bool.blackpd',
                # Inputs
                'total_N_fert_applied_Mg_per_ha',
                'total_non_N_fert_applied_Mg_per_ha',
-               'total_fert_applied_kg_per_ha',
-               'total_non_N_fert_applied_kg_per_ha',
-               'total_N_fert_applied_kg_per_ha',
                'total_fert_applied_Mg_per_ha',
                # Labour
                'total.hi.labor.days.per.year.per.ha',
-               # GHG emissions and related variables
-                 'lt.N2O.synthetic.total.Mg.CO2eq',
-                 'lt.N2O.Mg.total.alloc',
-               'Biomass.C.dens.per.tree.sh.tree.Mg',
+               # GHG emissions variables
+               'lc.GHG.remv.cc.Mg.CO2eq.ha.yr',
+               'lc.GHG.N2O.Mg.CO2eq',
+               'lc.GHG.remv.C.Mg.CO2eq', 
+               'lc.N2O.synthetic.total.Mg.CO2eq' ,
+               'lc.N2O.organic.shadet.resd.total.Mg.CO2eq' ,
+               'lc.N2O.organic.resd.total.Mg.CO2eq' , 
+               'lc.N2O.organic.inter.resd.total.Mg.CO2eq' , 
+               'lc.N2O.organic.other.total.Mg.CO2eq'  , 
+               'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr' , 
+               'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr' , 
+               'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' , 
+               'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr' ,
                # Profitability
+               'lc.net.VOP.1000.usd.per.ha',
                  'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.cc',
                   'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop',
-               'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop',
                'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.frt',
                'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ag.cmd',
                   'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.fuelw',
                   'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.hardw',
-                 'lc.net.VOP.1000.usd.per.ha',
                  # Agronomic characteristics
                  'domn_soil',
                'water.log.bool',
                'water.logged'
    )
-   
-   
-   
    
    
    
@@ -262,13 +261,12 @@ typology.data()
 run.typology <- function( ){
   
   setwd(cc.typ.dir)
-  
     # Typology sample selection
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # T.df <- T.df[ !is.na(T.df$Biomass.C.dens.total.litter.Mg) & T.df$Biomass.C.dens.total.litter.Mg < 100,]
  # T.df <- T.df[ !is.na(T.df$tree.count.per.ha) & T.df$tree.count.per.ha > 600 & T.df$tree.count.per.ha < 1600,]
 
-  #T.df <- T.df[ !is.na(T.df$lt.N2O.Mg.total.alloc) & T.df$lt.N2O.Mg.total.alloc < .3844 ,]
+  #T.df <- T.df[ !is.na(T.df$lc.N2O.Mg.total.alloc) & T.df$lc.N2O.Mg.total.alloc < .3844 ,]
   
 #  T.df <- T.df[ !is.na(T.df$plot.quant.shade.trees.ha) & T.df$plot.quant.shade.trees.ha < 100 ,]
 #  T.df <- T.df[ !is.na(T.df$Biomass.C.dens.per.tree.sh.tree.Mg) & T.df$Biomass.C.dens.per.tree.sh.tree.Mg < 5 ,]
@@ -665,8 +663,7 @@ run.typology <- function( ){
     )
   
   vars.stat <- c('cc.yd.lt.mn.Mg.ha',
-                 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr',
-                 'lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated', 
+                 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr',
                  'yld_pc_attain_plot',
                  'lc.net.VOP.1000.usd.per.ha',
                  'Biomass.C.dens.total.Mg.ha',
@@ -957,15 +954,15 @@ fig.intrag.dt.prep <- function(){
         
         #  var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
           
-          if (cat == emis.catg[1] ) {var <- 'lt.N2O.synthetic.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[2] ) {var <- 'lt.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'   }
-          if (cat == emis.catg[3] ) {var <- 'lt.N2O.organic.resd.total.Mg.CO2eq.pe'}
-          if (cat == emis.catg[4] ) {var <- 'lt.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[5] ) {var <- 'lt.N2O.organic.other.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[6] ) {var <- 'lt.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe'  }
-          if (cat == emis.catg[7] ) {var <- 'lt.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-          if (cat == emis.catg[8] ) {var <- 'lt.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-          if (cat == emis.catg[9] ) {var <- 'lt.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
+          if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
+          if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'   }
+          if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
+          if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
+          if (cat == emis.catg[5] ) {var <- 'lc.N2O.organic.other.total.Mg.CO2eq.pe' }
+          if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe'  }
+          if (cat == emis.catg[7] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
+          if (cat == emis.catg[8] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
+          if (cat == emis.catg[9] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
           
           # vr <- var.names[]
        #   print(paste(var))
@@ -982,15 +979,17 @@ fig.intrag.dt.prep <- function(){
           ghg.ab.dat[ghg.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
           
          #  Aggregated values
-          ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
-          ghg.ab.dat[ghg.row.count, 'tot.value.var' ] <- sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr' ]))
+          ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
+          ghg.ab.dat[ghg.row.count, 'tot.value.var' ] <- sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ]))
           
-          ghg.ab.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
-          ghg.ab.dat[ghg.row.count, 'tot.value.95pci' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr.95pci' ]))
+          ghg.ab.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
+          ghg.ab.dat[ghg.row.count, 'tot.value.95pci' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.95pci' ]))
 
           ghg.row.count %+=% 1
           
         }
+        
+        comp$lc.n2o.syn
         
         # VOP uncertainty
         for (cat in rev.catg){
@@ -1141,9 +1140,9 @@ fig.settings <- function(){
  intrag.fig.vop.leg.text.fs <<- 11
    
  # Variable ranges
- min.x.intrag.ghgr.int <<- 1.15 * min(na.omit(comp$typ.mn.lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated) - na.omit(comp$typ.sd.lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated))
- max.x.intrag.ghgr.int <<- 1.15 * (max(na.omit(comp$typ.mn.lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)) + max(na.omit(comp$typ.sd.lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)))
- min.x.intrag.ghgr.int <<- 1.15 * (min(na.omit(comp$typ.mn.lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)) - min(na.omit(comp$typ.sd.lt.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)))
+ min.x.intrag.ghgr.int <<- 1.15 * min(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated) - na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated))
+ max.x.intrag.ghgr.int <<- 1.15 * (max(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)) + max(na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)))
+ min.x.intrag.ghgr.int <<- 1.15 * (min(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)) - min(na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)))
  
  
  # GHG Figures
@@ -1428,15 +1427,15 @@ fig.interg.dt.prep <- function(){
         
         var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
         
-        if (cat == emis.catg[1] ) {var <- 'lt.N2O.synthetic.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[2] ) {var <- 'lt.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'  }
-        if (cat == emis.catg[3] ) {var <- 'lt.N2O.organic.resd.total.Mg.CO2eq.pe'}
-        if (cat == emis.catg[4] ) {var <- 'lt.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[5] ) {var <- 'lt.N2O.organic.other.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[6] ) {var <- 'lt.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[7] ) {var <- 'lt.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[8] ) {var <- 'lt.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[9] ) {var <- 'lt.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
+        if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'  }
+        if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
+        if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
+        if (cat == emis.catg[5] ) {var <- 'lc.N2O.organic.other.total.Mg.CO2eq.pe' }
+        if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[7] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[8] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[9] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
         
         # vr <- var.names[]
         print(paste(var))
@@ -1450,8 +1449,8 @@ fig.interg.dt.prep <- function(){
         inter.ghg.ab.dat[row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1   & !is.na(comp$typology) & !is.na(comp$typ) , var]))
         
         #  Aggregated values
-        inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
-        inter.ghg.ab.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lt.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
+        inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
+        inter.ghg.ab.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
         
         row.count %+=% 1
         
@@ -2009,7 +2008,7 @@ tb.typ.agfo <- function(){
   )
   
 
-  path_out = 'C:\\Users\\hawkj\\Documents\\Github\\MFL\\Survey\\GML.survey\\Figures.out\\'
+  path_out = '.\\Figures.out\\'
   fileName = paste(path_out, 'table_typology.agfo.csv',sep = '')
   write.csv(  agfor.dat  ,  file = fileName)  # Export
   #  View(agfor.dat)
@@ -2018,8 +2017,6 @@ tb.typ.agfo <- function(){
   agfor.dat <<- agfor.dat  
 }
 tb.typ.agfo() 
-
-
 
 
 tb.typ.pract <- function(){
@@ -2208,7 +2205,7 @@ tb.typ.pract <- function(){
   
   #pract.dat <<-  na.omit(pract.dat[])
 
-  path_out = 'C:\\Users\\hawkj\\Documents\\Github\\MFL\\Survey\\GML.survey\\Figures.out\\'
+  path_out = '.\\Figures.out\\'
   fileName = paste(path_out, 'table_typology.pract.csv',sep = '')
   write.csv(  pract.dat  ,   file = fileName)  # Export
   
@@ -2342,7 +2339,7 @@ tb.typ.clim <- function(){
                         'Altitude')
   
   
-  path_out = 'C:\\Users\\hawkj\\Documents\\Github\\MFL\\Survey\\GML.survey\\Figures.out\\'
+  path_out = '.\\Figures.out\\'
   fileName = paste(path_out, 'table_typology_clim.csv',sep = '')
   write.csv(  cli.dat  ,   file =   fileName )  # Export
   #View(cli.dat)
@@ -2473,7 +2470,7 @@ C.remv.sum <- data.frame(  matrix(ncol = length(var.names), nrow = length(rows) 
 
 
 # Cocoa
-var <- 'lt.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr'
+var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr'
 
 sc.2.min <- length.hysn +1
 sc.2.max <- sc.2.min  + length.hysh - 1
@@ -2495,7 +2492,7 @@ C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
 #View(C.remv.sum)
 
 # Shade
-var <- 'lt.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr'
+var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr'
 min.hysn <- max.hysn+ 1
 min.hysh <- max.hysh  + 1
 min.amaz <- max.amaz + 1
@@ -2524,7 +2521,7 @@ C.remv.sum[sc.2.min:sc.2.max, 'system'] <- 'Hybrid shade'
 C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
 
 # Intercrop
-var <- 'lt.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr'
+var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr'
 min.hysn <- max.hysn +1
 min.hysh <- max.hysh+ 1
 min.amaz <- max.amaz+ 1
@@ -2552,7 +2549,7 @@ C.remv.sum[sc.2.min:sc.2.max, 'system'] <-  'Hybrid shade'
 C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
 
 # Fruit/other
-var <- 'lt.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' 
+var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' 
 min.hysn <- max.hysn +1
 min.hysh <- max.hysh+ 1
 min.amaz <- max.amaz+ 1
@@ -2637,7 +2634,7 @@ fig.carbon()
 fig.compart.CO2r 
 
 
-# Export all typology data
+# Export all typology data as one excel file
 cols.to.include <- vr.list
 Typ.data <- comp[!is.na(comp$typ)   , c('typ' ,'typology' , 'hhID' , cols.to.include) ]
 
@@ -2668,9 +2665,9 @@ for (v in climatic.vars){
 }
 
 names(Typ.data)[names(Typ.data) == 'elev'] <- 'Elevation.m.asl'
-names(Typ.data)[names(Typ.data) ==  'temp'] <- 'Temperature'
+names(Typ.data)[names(Typ.data) == 'temp'] <- 'Temperature'
 names(Typ.data)[names(Typ.data) == 'precip'] <- 'Rainfall'
-names(Typ.data)[names(Typ.data) == 'temp.mmm'] <- 'Elevation.m.asl'
+names(Typ.data)[names(Typ.data) == 'temp.mmm'] <- 'Temp.mean.max.month'
 names(Typ.data)[names(Typ.data) == 'cv_precip'] <- 'Rainfall.cv'
 
 
@@ -2683,6 +2680,7 @@ comp <<- comp
 
 }  # END TYPOLOGY CODE
 run.typology()
+
 
 # Type comparisons
 fig.intrag.yg
