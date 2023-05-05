@@ -1091,6 +1091,8 @@ fig.intrag.dt.prep()
 
 fig.settings <- function(){
 
+  bar.chart.border.color <<- 'black'
+  bar.chart.border.thickness <<- 0.019735
  
  bar.width <<- 0.65
  bar.color <<- '#9aabbc'
@@ -1215,7 +1217,7 @@ fig.settings()
 intrag.figs <- function(){
 
   fig.barintrag.ghgr.t <- ggplot( data = ghg.ab.dat )  +
-    geom_bar(aes(y = value.mn  , x = Type.str, fill = Emission.category) , position="stack", stat="identity" , width = bar.width)+
+    geom_bar(aes(y = value.mn  , x = Type.str, fill = Emission.category) , position="stack", stat="identity" , width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
     geom_point(aes(y = tot.value.mn    , x = Type.str),stat = "identity",  shape=point.type, size= point.size , color = point.color.border , fill=point.color.fill )  +
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str) , width= error.bar.width , size = error.bar.size , color = error.bar.color
     ) +
@@ -1248,19 +1250,20 @@ intrag.figs <- function(){
       legend.box.margin = margin(.00005,.00005,.00005,.00005),
       legend.title = element_blank(),
       legend.text = element_text(intrag.fig.ghg.leg.text.fs),
-      axis.title.y = element_text(size =  y.tit.sz),
-      # axis.text.x=element_blank(),
+      axis.title.y = element_text(size =  y.tit.sz, face = "plain"),
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       # Panel
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
-      panel.background = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1))
+      panel.background = element_blank(),
+      panel.border = element_rect(colour = "black",
+                                  fill=NA, size=1))
   
   fig.barintrag.ghgr.t <<-  fig.barintrag.ghgr.t 
   
   fig.bar.intrag.vop <- ggplot( data = vop.dat[, ]  )  +
-    geom_bar(aes(y = value.mn  , x = Type.str, fill = Revenue.category) , position="stack", stat="identity",  width = bar.width)+
+    geom_bar(aes(y = value.mn  , x = Type.str, fill = Revenue.category) , position="stack", stat="identity",  width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str) , width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
     ) +
     scale_fill_manual(labels = labels_rev_srcs  , values = colors_rev_srcs )+
@@ -1291,7 +1294,7 @@ intrag.figs <- function(){
       legend.margin = margin(.00005,.00005,.00005,.00005),
       legend.box.margin = margin(.00005,.00005,.00005,.00005),
       legend.title = element_blank(),
-      axis.title.y = element_text(size =  y.tit.sz, face = "italic"),
+      axis.title.y = element_text(size =  y.tit.sz, face = "plain"),
       # axis.text.x=element_blank(),
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
@@ -1606,8 +1609,10 @@ interg.figs <- function(){
   
   fig.interg.yg.bar.width  <<- 0.65
   
+
+  
   fig.bar.intergr.ghgr.t.b <<- ggplot( data = inter.ghg.ab.dat[,]  )  +
-    geom_bar(aes(y = value.mn  , x = Typology, fill = Emission.category) , position="stack", stat="identity" , width = fig.interg.ghg.bar.width )+
+    geom_bar(aes(y = value.mn  , x = Typology, fill = Emission.category) , position="stack", stat="identity" , width = fig.interg.ghg.bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness )+
     # geom_bar(aes(y = typ.mn.cc.yd.lt.mn.Mg.ha   , x = typ.str, group = typ.str),stat = "identity")+
     #  stat_summary( aes(y = typ.mn.cc.yd.lt.mn.Mg.ha  , x = typ.str, group = typ.str), fun=mean, geom="point") +
     geom_point(aes(y = tot.value.mn    , x = Typology),stat = "identity",  shape = point.type, size= point.size , color = point.color.border , fill=point.color.fill ,   position=position_dodge(.9))  +
@@ -1649,7 +1654,7 @@ interg.figs <- function(){
 
   
   fig.bar.interg.vop.b <<- ggplot( data = interg.vop.dat[]  )  +
-    geom_bar(aes(y = value.mn  , x = Typology, fill = Revenue.category) , position="stack", stat="identity" , width = fig.interg.vop.bar.width)+
+    geom_bar(aes(y = value.mn  , x = Typology, fill = Revenue.category) , position="stack", stat="identity" , width = fig.interg.vop.bar.width, colour=bar.chart.border.color , size=bar.chart.border.thickness)+
     # geom_bar(aes(y = typ.mn.cc.yd.lt.mn.Mg.ha   , x = typ.str, group = typ.str),stat = "identity")+
     #  stat_summary( aes(y = typ.mn.cc.yd.lt.mn.Mg.ha  , x = typ.str, group = typ.str), fun=mean, geom="point") +
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Typology) ,  width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
@@ -2671,10 +2676,13 @@ names(Typ.data)[names(Typ.data) == 'temp.mmm'] <- 'Temp.mean.max.month'
 names(Typ.data)[names(Typ.data) == 'cv_precip'] <- 'Rainfall.cv'
 
 
-Typology.data.file.name = paste(path_out, 'Typology_data.csv',sep = '')
-write.csv( Typ.data  ,  file = Typology.data.file.name)  # Export
-#View(Typ.data)
+path_out = '.\\Figures.out\\'
 
+Typology.data.file.name = paste(path_out,'Typology_data.xlsx',sep = '')
+
+write.xlsx(T.df, Typology.data.file.name, sheetName = "Sheet1")
+
+write.xlsx(Typ.data  , Typology.data.file.name )
 
 comp <<- comp
 
