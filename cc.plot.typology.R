@@ -900,7 +900,7 @@ fig.intrag.dt.prep <- function(){
                #    'N2O shade litter',
                #    'N2O intercrop litter',
              #      'N2O other',
-                   'N2O organic total',
+                   'N2O organic',
                    'CO2 seqn. shade',
                    'CO2 seqn. cocoa',
                    'CO2 seqn. fruit',
@@ -987,6 +987,7 @@ fig.intrag.dt.prep <- function(){
           if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
           if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
 
+ 
           # vr <- var.names[]
        #   print(paste(var))
           
@@ -1081,6 +1082,13 @@ fig.intrag.dt.prep <- function(){
                                          'N2O shade litter',   
                                          'N2O intercrop litter',
                                          'N2O other',
+                                         'N2O syn' )
+  
+  ordered.ab.emission.categories <<- c(  'CO2 seqn. other',
+                                         'CO2 seqn. fruit',
+                                         'CO2 seqn. cocoa',
+                                         'CO2 seqn. shade',
+                                         'N2O organic',
                                          'N2O syn' )
                                       
                                      
@@ -1189,13 +1197,13 @@ fig.settings <- function(){
                          bquote('Cocoa tree '*CO[2]*''),
                           bquote('Shade tree '*CO[2]*''),
                          
-                         bquote('Cocoa tree biomass '*N[2]*'O'),
-                         bquote('Shade tree biomass '*N[2]*'O'),
+                        # bquote('Cocoa tree biomass '*N[2]*'O'),
+                        # bquote('Shade tree biomass '*N[2]*'O'),
                        #  bquote('Other tree/crop '*N[2]*'O'),
                       #   bquote('External organic '*N[2]*'O'),
                       #   bquote('Mineral fertiliser '*N[2]*'O') )
                       bquote('Total synthetic '*N[2]*'O'),
-                      bquote('Total organic '*N[2]*'O')
+                      bquote('Total organic  '*N[2]*'O')
                       
  
                        #    bquote('Synthetic fertiliser '*N[2]*'O') ,
@@ -1207,46 +1215,28 @@ fig.settings <- function(){
                      #   )
  )
  
- # greens https://htmlcolorcodes.com
- 
+ colors_emis_srcs <<- c( '#82E0AA' ,# interc
+                             '#2ECC71' , # fruit
+                             '#239B56' ,   # cocoa
+                             '#196F3D' , # shade
+                         '#F5B041',  # organic
+                         '#CA6F1E'  # synth
+ )
 
- colors_emis_srcs <<- c( '#D5DBDB' ,
-                         '#AAB7B8' ,
-                         '#839192' ,  # based on https://www.schemecolor.com/parrot-green-shades.php
-                         '#717D7E' ,
-                         '#FCF3CF',
-                         '#F7DC6F',
-                         #'#F1C40F',
-                         '#B7950B',
-                         '#9A7D0A'
-                       #     '#C0EC83', #old
-                       #  '#1A8828' , 
-                       #  '#547A1D' , 
-                        # '#96CC39' ,
-                       #  '#6BA32D' 
-                            )
-
- 
  # VOP figure
  
  labels_rev_srcs <<-  ordered.revenue.categories
  
  
  colors_rev_srcs <<-  c('#cd754c' , 
-                        '#9acd32', #     '#7fff00', 
+                        '#9acd32', 
                                            '#fdee00',
                                            '#ff8c00',
                                            '#c19a6b' , 
                                            '#826644'  )
 
  
- 
- #colors_rev_srcs <<-  c('#d58661' , 
-                   #     '#87a96b', 
-                      #  '#f8fab8',
-                      #  '#ff8c00',
-                       # '#bcb88a' , 
-                       # '#ada024'  )
+
  
 }
 fig.settings()
@@ -1254,16 +1244,12 @@ fig.settings()
 
 
 intrag.figs <- function(){
-
-
   
   fig.barintrag.ghgr.t <- ggplot( data = ghg.ab.dat )  +
     geom_bar(aes(y = value.mn  , x = Type.str.fill , fill = Emission.category) , position="stack", stat="identity" , width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
     geom_point(aes(y = tot.value.mn    , x = Type.str.fill),stat = "identity",  shape=point.type, size= point.size , color = point.color.border , fill=point.color.fill )  +
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str.fill) , width= error.bar.width , size = error.bar.size , color = error.bar.color
     ) +
- #  geom_errorbar(aes(ymin = tot.value.mn -  tot.value.var, ymax = tot.value.mn +  tot.value.var , x = Type.str) , width= error.bar.width , size = error.bar.size , color = 'black'
-  #  ) +
     scale_fill_manual(labels = labels_emis_srcs  , values = colors_emis_srcs ) +
     xlab('')  +
     ylab(bquote(bold('Net GHG emissions (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')')))  +
@@ -1271,7 +1257,7 @@ intrag.figs <- function(){
     scale_y_continuous(
       limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) ,breaks = seq(-14.0, 2.0, by = 2), 
       labels = scales::number_format(accuracy = 0.1))  +
-    guides(fill = guide_legend(override.aes = list(colour = "gray", size = .392*2)))+
+   # guides(fill = guide_legend(override.aes = list(colour = "gray", size = .392*2)))+
     #guides(fill = guide_legend(bycol = TRUE))+
     guides(fill = guide_legend(byrow = TRUE))+
     theme(
@@ -1804,7 +1790,7 @@ interg.figs <- function(){
   fig.bar.interg.vop <<- annotate_figure(fig.bar.interg.vop.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
   
   
-  fig.interg.1   <<- plot_grid(  fig.interg.yg,
+  fig.yield   <<- plot_grid(  fig.interg.yg,
                                  fig.interg.yd.act,
                               align = "v", 
                               nrow = 2, 
@@ -1813,11 +1799,11 @@ interg.figs <- function(){
                               )
   
   
-  ggsave("fig.interg.1.jpeg", fig.interg.1   , path = "Figures.out", width=610, height=1040, units="px", scale=1.65)
+  ggsave("fig.yield.jpeg", fig.yield   , path = "Figures.out", width=610, height=1040, units="px", scale=1.65)
 #  ggsave("fig.interg.1.jpeg", fig.interg.1   , path = "Figures.out", width=430, height=710, units="px", scale=2.5)
   
-  ggsave("fig.bar.intergr.ghgr.t.jpeg", fig.bar.intergr.ghgr.t.b  , path = "Figures.out", width=780, height=480, units="px", scale=2.5)
-  ggsave("fig.bar.interg.vop.jpeg", fig.bar.interg.vop.b  , path = "Figures.out", width=780, height=480, units="px", scale=2.5)
+ # ggsave("fig.bar.intergr.ghgr.t.jpeg", fig.bar.intergr.ghgr.t.b  , path = "Figures.out", width=780, height=480, units="px", scale=2.5)
+  #ggsave("fig.bar.interg.vop.jpeg", fig.bar.interg.vop.b  , path = "Figures.out", width=780, height=480, units="px", scale=2.5)
   
   
  
@@ -1838,7 +1824,7 @@ interg.figs <- function(){
   
   ggsave("fig.vop.jpeg",  fig.vop   , path = "Figures.out", width=1350, height=510, units="px", scale=2.5)
   
-  ggsave("fig.bar.ghgr.t.jpeg",  fig.ghg  , path = "Figures.out", width=1350, height=510, units="px", scale=2.5)
+  ggsave("fig.ghg.jpeg",  fig.ghg  , path = "Figures.out", width=1350, height=510, units="px", scale=2.5)
   
   
   
