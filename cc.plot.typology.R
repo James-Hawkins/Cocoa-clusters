@@ -2731,8 +2731,8 @@ fig.vop # ideal dimensions 860, 390
 # System comparisons
 fig.interg.yd.act
 fig.interg.yg
-fig.bar.intergr.ghgr.t.b
-fig.bar.interg.vop.b
+#fig.bar.intergr.ghgr.t.b
+#fig.bar.interg.vop.b
 
 
 # Allometric results
