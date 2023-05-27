@@ -253,6 +253,8 @@ typology.data <- function(){
      
    } 
    
+   bioclim$yld_pc_attain_plot
+   
   T.df <<- as.data.frame(bioclim)
  }
 typology.data()
@@ -261,6 +263,7 @@ typology.data()
 run.typology <- function( ){
   
   setwd(cc.typ.dir)
+  
     # Typology sample selection
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # T.df <- T.df[ !is.na(T.df$Biomass.C.dens.total.litter.Mg) & T.df$Biomass.C.dens.total.litter.Mg < 100,]
@@ -272,6 +275,8 @@ run.typology <- function( ){
 #  T.df <- T.df[ !is.na(T.df$Biomass.C.dens.per.tree.sh.tree.Mg) & T.df$Biomass.C.dens.per.tree.sh.tree.Mg < 5 ,]
   
  # T.df <- T.df[ !is.na(T.df$Biomass.C.dens.interc.litter.Mg) & T.df$Biomass.C.dens.interc.litter.Mg < 16 ,]
+  T.df <- T.df[ !is.na(T.df$yld_pc_attain_plot) & T.df$yld_pc_attain_plot < 100 ,]
+  
   
   T.df <- T.df[ !is.na(T.df$shade.tree.to.cm.tree.ratio) & !(T.df$shade.tree.to.cm.tree.ratio < 0) & !(T.df$shade.tree.to.cm.tree.ratio*100 > 100 ) ,]
   
@@ -738,7 +743,7 @@ run.typology <- function( ){
 # assign string names to clusters  
   comp[ ,'typ.str']  <- NA
   comp[ ,'typology']  <- NA
-  
+  comp[ ,'typ.str.fill']  <- 'Sample name !'
   
   # Name types
   for (T in typologies){
@@ -775,6 +780,9 @@ run.typology <- function( ){
     comp[comp$hhID %in% data[data$typ == i,    'hhID'] ,   'typ.str']  <- match(i,t.nm) 
     comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ']  <- i
     
+    name <- str_c('Cluster numero ', i)
+    
+    comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ.str.fill']  <-  name
     }
     
     if (T == 'Traditional') {
@@ -847,7 +855,7 @@ run.typology <- function( ){
   
  
 
-ordered.typologies <<- c( 'Hybrid sun', 'Amazonia' , 'Hybrid shade' )
+ordered.typologies <<- c( 'Hybrid sun' , 'Amazonia' , 'Hybrid shade' )
 comp$typology <- factor(comp$typology  , levels= ordered.typologies)
 
  
@@ -877,6 +885,7 @@ fig.intrag.dt.prep <- function(){
     ghg.ab.dat.var.names <- c ('Typology',
                             'Type',
                             'Type.str' , 
+                            'typ.str.fill',
                             'Emission.category',
                             'value.mn',
                             'value.sd',
@@ -885,15 +894,18 @@ fig.intrag.dt.prep <- function(){
                             'tot.value.sd',
                             'tot.value.95pci')
     
-    emis.catg <- c('N2O syn',
-                   'N2O cocoa litter',
-                   'N2O shade litter',
-                   'N2O intercrop litter',
-                   'N2O other',
+    emis.catg <- c(
+      'N2O syn',
+                #   'N2O cocoa litter',
+               #    'N2O shade litter',
+               #    'N2O intercrop litter',
+             #      'N2O other',
+                   'N2O organic total',
                    'CO2 seqn. shade',
                    'CO2 seqn. cocoa',
                    'CO2 seqn. fruit',
-                   'CO2 seqn. other')
+                   'CO2 seqn. other'
+                   )
     
     
     rows <- seq( 1 : (3*5*length(emis.catg)) )
@@ -901,10 +913,11 @@ fig.intrag.dt.prep <- function(){
     ghg.ab.dat <- data.frame(  matrix(ncol = length(ghg.ab.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , ghg.ab.dat.var.names )))
 
     #VOP prep
-    # Value of production
+    # Value of production 
     vop.dat.var.names <- c ('Typology',
                             'Type',
                             'Type.str' , 
+                            'typ.str.fill',
                             'Revenue category',
                             'value.mn',
                             'value.sd',
@@ -925,13 +938,22 @@ fig.intrag.dt.prep <- function(){
     
     vop.dat <- data.frame(  matrix(ncol = length(vop.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , vop.dat.var.names )))
     
-    var.names <- c('lc.net.VOP.1000.usd.per.ha.frac.rev.basis.cc',
+    var.names.old <- c('lc.net.VOP.1000.usd.per.ha.frac.rev.basis.cc',
                    'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.fuelw',
                    'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.hardw',
                    'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop',
                    'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.frt',
                    'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ag.cmd'
     )
+    
+    var.names <- c('lc.net.VOP.1000.usd.per.ha.cc',
+                   'lc.net.VOP.1000.usd.per.ha.fuelw',
+                   'lc.net.VOP.1000.usd.per.ha.hardw',
+                   'lc.net.VOP.1000.usd.per.ha.ann.crop',
+                   'lc.net.VOP.1000.usd.per.ha.frt',
+                   'lc.net.VOP.1000.usd.per.ha.ag.cmd'
+    )
+    
     
     
     
@@ -955,15 +977,16 @@ fig.intrag.dt.prep <- function(){
         #  var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
           
           if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'   }
-          if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
-          if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[5] ) {var <- 'lc.N2O.organic.other.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe'  }
-          if (cat == emis.catg[7] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-          if (cat == emis.catg[8] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-          if (cat == emis.catg[9] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
-          
+        #  if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'   }
+        #  if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
+       #   if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
+         # if (cat == emis.catg[5] ) {var <- 'lc.N2O.organic.other.total.Mg.CO2eq.pe' }
+          if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq.pe' }
+          if (cat == emis.catg[3] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe'  }
+          if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
+          if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
+          if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
+
           # vr <- var.names[]
        #   print(paste(var))
           
@@ -973,6 +996,8 @@ fig.intrag.dt.prep <- function(){
           ghg.ab.dat[ghg.row.count, 'Type' ] <- t2
           
           ghg.ab.dat[ghg.row.count, 'Type.str' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str' ] )
+          ghg.ab.dat[ghg.row.count, 'Type.str.fill' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str.fill' ] )
+          
           
           ghg.ab.dat[ghg.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
           
@@ -1014,6 +1039,7 @@ fig.intrag.dt.prep <- function(){
           vop.dat[vop.row.count, 'Type' ] <- t2
           
           vop.dat[vop.row.count, 'Type.str' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str' ] )
+          vop.dat[vop.row.count, 'Type.str.fill' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str.fill' ] )
           
           
           vop.dat[vop.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
@@ -1092,14 +1118,19 @@ fig.intrag.dt.prep()
 fig.settings <- function(){
 
   bar.chart.border.color <<- 'black'
-  bar.chart.border.thickness <<- 0.019735
+  bar.chart.border.thickness <<- 0.049735
  
+  fig.ghg.leg.x.coord  <<- 0.14 
+  fig.ghg.leg.y.coord <<-  0.3
+  fig.vop.leg.x.coord <<- 0.155
+  fig.vop.leg.y.coord <<- 0.7
+  
  bar.width <<- 0.65
  bar.color <<- '#9aabbc'
  bar.color.border <<- 'black'
  
- box.plot.color <<- "#000000"
- fig.yd.bp.thickness <<- 0.12
+  box.plot.color <<- "#000000"
+  fig.yd.bp.thickness <<- 0.12
   fig.yd.bp.fatten <<- 1.4
  
    box.plot.fill.color <<- "#a9a9a9"
@@ -1119,18 +1150,23 @@ fig.settings <- function(){
  facet.tx.size <<- 10
  x.tick.angle <<- 270.0  
  
+ label.fs <<- 11.5
+ 
  p.mg.left <<- 0.7
  p.mg.right <<- 0.2
  p.mg.top <<- 0.2
  p.mg.bottom <<- 0.2
  
  
-
+ fig.ghg.y.lim.max <<- 1
+ fig.ghg.y.lim.min <<- -14
+   
+   
  intrag.leg.key.h.ghg <<- 0.40
  intrag.leg.key.w.ghg <<- 0.40
  
- intrag.leg.key.h.vop <<- 0.44
- intrag.leg.key.w.vop <<- 0.44
+ intrag.leg.key.h.vop <<- 0.40
+ intrag.leg.key.w.vop <<- 0.40
    
  intrag.leg.space.x.ghg <<- 0.6
  intrag.leg.space.y.ghg <<- 0.175
@@ -1139,7 +1175,7 @@ fig.settings <- function(){
  intrag.leg.space.y.vop <<- intrag.leg.space.y.ghg
    
  intrag.fig.ghg.leg.text.fs <<- 9
- intrag.fig.vop.leg.text.fs <<- 11
+ intrag.fig.vop.leg.text.fs <<- 9
    
  # Variable ranges
  min.x.intrag.ghgr.int <<- 1.15 * min(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated) - na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated))
@@ -1155,9 +1191,12 @@ fig.settings <- function(){
                          
                          bquote('Cocoa tree biomass '*N[2]*'O'),
                          bquote('Shade tree biomass '*N[2]*'O'),
-                         bquote('Other tree/crop '*N[2]*'O'),
-                         bquote('External organic '*N[2]*'O'),
-                         bquote('Mineral fertiliser '*N[2]*'O') )
+                       #  bquote('Other tree/crop '*N[2]*'O'),
+                      #   bquote('External organic '*N[2]*'O'),
+                      #   bquote('Mineral fertiliser '*N[2]*'O') )
+                      bquote('Total synthetic '*N[2]*'O'),
+                      bquote('Total organic '*N[2]*'O')
+                      
  
                        #    bquote('Synthetic fertiliser '*N[2]*'O') ,
                         #    bquote('Cocoa tree biomass '*N[2]*'O'),
@@ -1166,7 +1205,7 @@ fig.settings <- function(){
                       #  bquote('Other organic '*N[2]*'O')
                         
                      #   )
- 
+ )
  
  # greens https://htmlcolorcodes.com
  
@@ -1177,7 +1216,7 @@ fig.settings <- function(){
                          '#717D7E' ,
                          '#FCF3CF',
                          '#F7DC6F',
-                         '#F1C40F',
+                         #'#F1C40F',
                          '#B7950B',
                          '#9A7D0A'
                        #     '#C0EC83', #old
@@ -1216,10 +1255,12 @@ fig.settings()
 
 intrag.figs <- function(){
 
+
+  
   fig.barintrag.ghgr.t <- ggplot( data = ghg.ab.dat )  +
-    geom_bar(aes(y = value.mn  , x = Type.str, fill = Emission.category) , position="stack", stat="identity" , width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
-    geom_point(aes(y = tot.value.mn    , x = Type.str),stat = "identity",  shape=point.type, size= point.size , color = point.color.border , fill=point.color.fill )  +
-    geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str) , width= error.bar.width , size = error.bar.size , color = error.bar.color
+    geom_bar(aes(y = value.mn  , x = Type.str.fill , fill = Emission.category) , position="stack", stat="identity" , width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
+    geom_point(aes(y = tot.value.mn    , x = Type.str.fill),stat = "identity",  shape=point.type, size= point.size , color = point.color.border , fill=point.color.fill )  +
+    geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str.fill) , width= error.bar.width , size = error.bar.size , color = error.bar.color
     ) +
  #  geom_errorbar(aes(ymin = tot.value.mn -  tot.value.var, ymax = tot.value.mn +  tot.value.var , x = Type.str) , width= error.bar.width , size = error.bar.size , color = 'black'
   #  ) +
@@ -1228,7 +1269,7 @@ intrag.figs <- function(){
     ylab(bquote(bold('Net GHG emissions (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')')))  +
     facet_wrap( Typology ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
     scale_y_continuous(
-      limits = c(-14.0, 2.0) ,breaks = seq(-14.0, 2.0, by = 2), 
+      limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) ,breaks = seq(-14.0, 2.0, by = 2), 
       labels = scales::number_format(accuracy = 0.1))  +
     guides(fill = guide_legend(override.aes = list(colour = "gray", size = .392*2)))+
     #guides(fill = guide_legend(bycol = TRUE))+
@@ -1245,7 +1286,8 @@ intrag.figs <- function(){
       legend.key.width = unit(intrag.leg.key.w.ghg, 'cm'),
       legend.spacing.y = unit(intrag.leg.space.y.ghg, 'cm'),
       legend.spacing.x = unit(intrag.leg.space.x.ghg, 'cm'),
-      legend.position = "bottom",
+      #legend.position = "bottom",
+      legend.position = c(fig.ghg.leg.x.coord , fig.ghg.leg.y.coord),
       legend.margin = margin(.00005,.00005,.00005,0.00005),
       legend.box.margin = margin(.00005,.00005,.00005,.00005),
       legend.title = element_blank(),
@@ -1260,11 +1302,11 @@ intrag.figs <- function(){
       panel.border = element_rect(colour = "black",
                                   fill=NA, size=1))
   
-  fig.barintrag.ghgr.t <<-  fig.barintrag.ghgr.t 
+
   
-  fig.bar.intrag.vop <- ggplot( data = vop.dat[, ]  )  +
-    geom_bar(aes(y = value.mn  , x = Type.str, fill = Revenue.category) , position="stack", stat="identity",  width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
-    geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str) , width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
+  fig.bar.intrag.vop.b <- ggplot( data = vop.dat[, ]  )  +
+    geom_bar(aes(y = value.mn  , x = Type.str.fill, fill = Revenue.category) , position="stack", stat="identity",  width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
+    geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str.fill) , width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
     ) +
     scale_fill_manual(labels = labels_rev_srcs  , values = colors_rev_srcs )+
     xlab('')+
@@ -1290,7 +1332,8 @@ intrag.figs <- function(){
       legend.spacing.x = unit(intrag.leg.space.x.vop, 'cm'),
       legend.spacing.y = unit(intrag.leg.space.y.vop, 'cm'),
       #  legend.key.size = unit(.42, 'cm'),
-      legend.position = "bottom",
+     # legend.position = "bottom",
+      legend.position = c(fig.vop.leg.x.coord , fig.vop.leg.y.coord),
       legend.margin = margin(.00005,.00005,.00005,.00005),
       legend.box.margin = margin(.00005,.00005,.00005,.00005),
       legend.title = element_blank(),
@@ -1300,8 +1343,7 @@ intrag.figs <- function(){
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1))  #810,320
   
-  fig.bar.intrag.vop <<-  fig.bar.intrag.vop 
-  
+
   fig.intrag.yg.b <- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)     ,]  ) +
   geom_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str ) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten)+
     #  geom_point(aes(y = typ.mn.yld_pc_attain_plot   , x = typ.str, group = typ.str),stat = "identity",  shape=point.type, size= point.size , color = point.color.border , fill=point.color.fill)  +
@@ -1366,9 +1408,14 @@ fig.intrag.yd.act.b <<- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(com
 
 
 
-fig.intrag.yg <- annotate_figure(fig.intrag.yg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = 10)
+fig.intrag.yg <<- annotate_figure(fig.intrag.yg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = 9.5)
 
-fig.intrag.yd.act <- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = 10)
+fig.intrag.yd.act <<- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = 10)
+
+
+fig.barintrag.ghgr.t <<-  annotate_figure(fig.barintrag.ghgr.t,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
+
+fig.bar.intrag.vop  <<- annotate_figure( fig.bar.intrag.vop.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
 
 
 fig.intrag.1   <- plot_grid( fig.intrag.yg , fig.intrag.yd.act ,  align = "v", nrow = 1  )
@@ -1393,8 +1440,6 @@ fig.barintrag.ghgr.t
 fig.intrag.yg
 fig.intrag.yd.act
 
-
-
 fig.interg.dt.prep <- function(){
 
   
@@ -1404,14 +1449,15 @@ fig.interg.dt.prep <- function(){
                              'value.mn',
                              'value.sd',
                              'tot.value.mn',
-                             'tot.value.sd')
+                             'tot.value.sd',
+                             'facet.lab')
   
   
   emis.catg <- c('N2O syn',
-                 'N2O shade litter',
-                 'N2O cocoa litter',
-                 'N2O intercrop litter',
-                 'N2O other',
+               #  'N2O shade litter',
+             #  #  'N2O cocoa litter',
+              #   'N2O intercrop litter',
+                 'N2O organic',
                  'CO2 seqn. shade',
                  'CO2 seqn. cocoa',
                  'CO2 seqn. fruit',
@@ -1431,14 +1477,14 @@ fig.interg.dt.prep <- function(){
         var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
         
         if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'  }
-        if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
-        if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[5] ) {var <- 'lc.N2O.organic.other.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[7] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[8] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[9] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
+      #  if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'  }
+       # if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
+       # if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
+        if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq.pe' }
+        if (cat == emis.catg[3] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
         
         # vr <- var.names[]
         print(paste(var))
@@ -1455,6 +1501,7 @@ fig.interg.dt.prep <- function(){
         inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
         inter.ghg.ab.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
         
+        inter.ghg.ab.dat[row.count, 'facet.lab' ] <-  'Cluster aggregates'
         row.count %+=% 1
         
         
@@ -1472,7 +1519,8 @@ fig.interg.dt.prep <- function(){
                           'value.mn',
                           'value.sd',
                           'tot.value.mn',
-                          'tot.value.sd')
+                          'tot.value.sd',
+                          'facet.lab')
   
   
   rows <- seq(1:(3*4))
@@ -1527,7 +1575,8 @@ fig.interg.dt.prep <- function(){
         # Aggregated values
         interg.vop.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 &  !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha']))
         interg.vop.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 &  !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.sd']))
-
+        interg.vop.dat[row.count, 'facet.lab' ] <-  'Cluster aggregates'
+        
         row.count %+=% 1
         
         
@@ -1580,15 +1629,20 @@ interg.figs <- function(){
   bar.interg.legend.left.margin <<- 7
   bar.interg.legend.right.margin <<- 2
   
-  fig.bar.interg.vop.p.mg.bottom <- .05
-  fig.bar.intergr.ghgr.p.mg.top <-  .05
+  fig.bar.interg.vop.p.mg.bottom <<- .05
+  fig.bar.intergr.ghgr.p.mg.top <<-  p.mg.top
+  fig.bar.intergr.ghgr.p.mg.left <<- 0.1
+  
+  
+  fig.bar.intergr.vop.p.mg.top <<-  fig.bar.intergr.ghgr.p.mg.top
+  fig.bar.intergr.vop.p.mg.left <<-   fig.bar.intergr.ghgr.p.mg.left
   
   interg.leg.key.h.ghg <<- 0.37
   interg.leg.key.w.ghg <<- 0.37
   interg.leg.key.h.vop <<- 0.47
   interg.leg.key.w.vop <<- 0.47
   
-  fig.interg.ghg.x.tick.fs <<- 11.5
+  fig.interg.ghg.x.tick.fs <<- x.tick.fs # 11.5 
   fig.interg.vop.x.tick.fs <<- 11
   
   fig.interg.ghg.y.tick.fs <<- 9
@@ -1609,36 +1663,41 @@ interg.figs <- function(){
   
   fig.interg.yg.bar.width  <<- 0.65
   
-
+  fig.vop.y.lim.min <<-  0
+  fig.vop.y.lim.max <<- 1.5
   
   fig.bar.intergr.ghgr.t.b <<- ggplot( data = inter.ghg.ab.dat[,]  )  +
     geom_bar(aes(y = value.mn  , x = Typology, fill = Emission.category) , position="stack", stat="identity" , width = fig.interg.ghg.bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness )+
-    # geom_bar(aes(y = typ.mn.cc.yd.lt.mn.Mg.ha   , x = typ.str, group = typ.str),stat = "identity")+
-    #  stat_summary( aes(y = typ.mn.cc.yd.lt.mn.Mg.ha  , x = typ.str, group = typ.str), fun=mean, geom="point") +
     geom_point(aes(y = tot.value.mn    , x = Typology),stat = "identity",  shape = point.type, size= point.size , color = point.color.border , fill=point.color.fill ,   position=position_dodge(.9))  +
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Typology) , width= error.bar.width , size = error.bar.size , color = error.bar.color
     ) +
     scale_fill_manual(labels = display.names.ab.emission , values = colors_emis_srcs ) +
-    xlab('')+
-    ylab(bquote('Net GHG-e (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')   '))  +
-    #   facet_wrap( Typology ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
-    scale_y_continuous(
-      limits = c(-12.5, 0.5) ,breaks = seq(-12, 0, by = 1.5),
-      labels = scales::number_format(accuracy = 0.1))  +
+    xlab('') +
+    ylab('') +
+   facet_wrap(  facet.lab ~ . , ncol = 1, nrow = 1 , scales = "free_x")   +
+    coord_cartesian( ylim = c(fig.ghg.y.lim.min, fig.ghg.y.lim.max)) +
+   # ylab(bquote('Net GHG-e (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')   '))  +
+      # facet_wrap( facet.lab ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
+    #scale_y_continuous(
+      #limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) 
+      #breaks = seq( fig.ghg.y.lim.min  , fig.ghg.y.lim.max, by = 2.0),
+     # labels = scales::number_format(accuracy = 0.1)
+    # )  +
     guides(fill = guide_legend(byrow = TRUE)) +
     theme(
       legend.text = element_text(size = interg.fig.ghg.leg.text.fs),
-      plot.margin = unit(c(fig.bar.intergr.ghgr.p.mg.top ,p.mg.right, p.mg.bottom ,p.mg.left), "cm"),
+      plot.margin = unit(c(fig.bar.intergr.ghgr.p.mg.top , p.mg.right , p.mg.bottom , fig.bar.intergr.ghgr.p.mg.left), "cm"),
       axis.ticks.x = element_blank(),
-    #  axis.text.x =  element_blank(),
-      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs),
-      axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = fig.interg.ghg.y.tick.fs),
+      axis.ticks.y = element_blank(),
+      axis.text.y =  element_blank(),
+     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs),
+     # axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = fig.interg.ghg.y.tick.fs),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
       # Legend
       legend.key.size = unit(.42, 'cm'),
-      legend.position = "right",
+      legend.position = "none",
       legend.key.height = unit(interg.leg.key.h.ghg, 'cm'),
       legend.key.width = unit(interg.leg.key.w.ghg, 'cm'),
       legend.spacing.y = unit(fig.bar.inter.ghg.legend.row.spacing.cm, 'cm'),
@@ -1647,7 +1706,6 @@ interg.figs <- function(){
       legend.box.margin = margin(.00005,.00005,.00005,0.00005),
       legend.title = element_blank(),
       axis.title.y = element_text(size =    fig.interg.ghg.y.tit.fs),
-      # axis.text.x=element_blank(),
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1))
@@ -1655,31 +1713,34 @@ interg.figs <- function(){
   
   fig.bar.interg.vop.b <<- ggplot( data = interg.vop.dat[]  )  +
     geom_bar(aes(y = value.mn  , x = Typology, fill = Revenue.category) , position="stack", stat="identity" , width = fig.interg.vop.bar.width, colour=bar.chart.border.color , size=bar.chart.border.thickness)+
-    # geom_bar(aes(y = typ.mn.cc.yd.lt.mn.Mg.ha   , x = typ.str, group = typ.str),stat = "identity")+
-    #  stat_summary( aes(y = typ.mn.cc.yd.lt.mn.Mg.ha  , x = typ.str, group = typ.str), fun=mean, geom="point") +
-    geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Typology) ,  width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
+     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Typology) ,  width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
     ) +
-    scale_fill_manual(labels = labels_rev_srcs  , values = colors_rev_srcs)+
-    xlab('')+
-    ylab(bquote('Value of production ('*10^3*' USD '*ha^-1*' '*yr^-1*')   '))+
-    # facet_wrap( Typology ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
-    scale_y_continuous(
+    scale_fill_manual(labels = labels_rev_srcs  , values = colors_rev_srcs) +
+    xlab('') +
+    ylab('') +
+  #  ylab(bquote('Value of production ('*10^3*' USD '*ha^-1*' '*yr^-1*')   ')) +
+        scale_y_continuous(
       limits = c(-.15, 1.5) ,breaks = seq(0, 1.5, by = 0.25),
       labels = scales::number_format(accuracy = 0.1))  +
-    guides(fill = guide_legend(byrow = TRUE))+
+    guides(fill = guide_legend(byrow = TRUE)) +
+    facet_wrap(  facet.lab ~ . , ncol = 1, nrow = 1 , scales = "free_x")   +
+    coord_cartesian( ylim = c(fig.vop.y.lim.min, fig.vop.y.lim.max)) +
     theme(
       legend.text = element_text(size = interg.fig.vop.leg.text.fs),
-      plot.margin = unit(c(p.mg.top,p.mg.right, fig.bar.interg.vop.p.mg.bottom ,p.mg.left), "cm"),
+      plot.margin = unit(c(fig.bar.intergr.vop.p.mg.top , p.mg.right , p.mg.bottom , fig.bar.intergr.vop.p.mg.left), "cm"),
       axis.ticks.x = element_blank(),
+      axis.ticks.y = element_blank(),
      # axis.text.x = element_blank(),
-      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.vop.x.tick.fs),
-      axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
+     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs),
+    #  axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.vop.x.tick.fs),
+     # axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
+    axis.text.y = element_blank(),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
       # Legend
       legend.key.size = unit(.42, 'cm'),
-      legend.position = "right",
+      legend.position = "none",
       legend.key.height = unit(interg.leg.key.h.vop, 'cm'),
       legend.key.width = unit(interg.leg.key.w.vop, 'cm'),
       legend.spacing.y = unit(fig.bar.inter.nvp.row.spacing.cm, 'cm'),
@@ -1687,26 +1748,22 @@ interg.figs <- function(){
       legend.margin = margin(.00005, bar.interg.legend.right.margin ,.00005, bar.interg.legend.left.margin),
       legend.box.margin = margin(.00005,.00005,.00005,.00005),
       legend.title = element_blank(),
-      axis.title.y = element_text(size =  fig.interg.vop.y.tit.fs),
+      axis.title.y = element_blank(),
+      #axis.title.y = element_text(size =  fig.interg.vop.y.tit.fs),
       # axis.text.x=element_blank(),
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1))
   
-  
   fig.interg.yg.b <<- ggplot( data= comp[ !is.na(comp$typology) &  !(comp$hhID %in%  hh_exclude.cc.yd.typ )   &  !is.na(comp$typology)    & !is.na(comp$yld_pc_attain_plot) ,]) +
     geom_boxplot(aes(y = yld_pc_attain_plot  , x = typology, group = typology), width = fig.interg.yg.bar.width , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 ,  lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
     xlab('') +
-    #  scale_y_reverse(limits = c(0, 100))+
     ylab('Percent attainable yield (%)')+
-    # facet_wrap( typology ~ . , ncol =5, nrow = 1 , scales = 'free_x')   + 
-     scale_y_continuous(labels = scales::number_format(accuracy = 0.1))+
+    coord_cartesian(ylim=c(0, 100.0)) +
+     scale_y_continuous( labels = scales::number_format(accuracy = 0.1))+
     theme(
       plot.margin = unit(c(p.mg.top,p.mg.right,-.3,p.mg.left), "cm"),
-      axis.ticks.x = element_blank(),
-     # axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = fig.interg.yg.x.tick.fs),
-        axis.text.x = element_blank(),
-      # axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),  axis.text.x = element_blank(),
       axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = fig.interg.yg.y.tick.fs),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
@@ -1719,17 +1776,11 @@ interg.figs <- function(){
   
   fig.interg.yd.act.b <<- ggplot( data= comp[ !is.na(comp$typology) &  !(comp$hhID %in%  hh_exclude.cc.yd.typ )   &  !is.na(comp$typology)    & !is.na(comp$cc.yd.lt.mn.Mg.ha) ,]) +
     geom_boxplot(aes(y = cc.yd.lt.mn.Mg.ha  , x = typology, group = typology), width = fig.interg.yg.bar.width ,  outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 ,  lwd= fig.yd.bp.thickness ,  fatten = fig.yd.bp.fatten)+
-    # geom_point(aes(y = typ.mn.cc.yd.lt.mn.Mg.ha   , x = typ.str, group = typ.str),stat = "identity",  shape=15, size=2.5, color="black", fill="red")+
-    # geom_bar(aes(y = typ.mn.cc.yd.lt.mn.Mg.ha   , x = typ.str, group = typ.str),stat = "identity")+
-    # stat_summary( aes(y = typ.mn.cc.yd.lt.mn.Mg.ha  , x = typ.str, group = typ.str), fun=mean, geom="bar") +
-    # geom_errorbar(aes(ymin = typ.mn.cc.yd.lt.mn.Mg.ha + typ.sd.cc.yd.lt.mn.Mg.ha, ymax = typ.mn.cc.yd.lt.mn.Mg.ha -  typ.sd.cc.yd.lt.mn.Mg.ha , x = typ.str, group = typ.str), width=.4 #,  position=position_dodge(.9)
-    #   ) +
-   # scale_y_continuous(limits = c(0, 2.5))+
     xlab('') +
-    #   scale_y_reverse(limits = c(0, 2.5))+
     ylab(' (Mg ha yr)')+
     ylab(bquote('Actual yield (Mg  '*ha^-1*' '*yr^-1*')    '))+
-  scale_y_continuous(limits = c(0, 2.0), labels = scales::number_format(accuracy = 0.01))+
+    coord_cartesian(ylim=c(0, 2.05)) +
+  scale_y_continuous( labels = scales::number_format(accuracy = 0.01))+
     theme(
       plot.margin = unit(c(p.mg.top,p.mg.right,-.3,p.mg.left), "cm"),
       axis.ticks.x = element_blank(),
@@ -1746,11 +1797,11 @@ interg.figs <- function(){
     )  
   
 
-  fig.interg.yg <- annotate_figure( fig.interg.yg.b,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = 11)   
-  fig.interg.yd.act <-  annotate_figure( fig.interg.yd.act.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = 11)  
+  fig.interg.yg <- annotate_figure( fig.interg.yg.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs)   
+  fig.interg.yd.act <-  annotate_figure( fig.interg.yd.act.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size =label.fs)  
   
- # fig.bar.intergr.ghgr.t <<- annotate_figure( fig.bar.intergr.ghgr.t.b,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = 12, fig.lab.face = 'bold')
- # fig.bar.interg.vop <<- annotate_figure(fig.bar.interg.vop.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = 12, fig.lab.face = 'bold')
+ fig.bar.intergr.ghgr.t <<- annotate_figure( fig.bar.intergr.ghgr.t.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
+  fig.bar.interg.vop <<- annotate_figure(fig.bar.interg.vop.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
   
   
   fig.interg.1   <<- plot_grid(  fig.interg.yg,
@@ -1761,19 +1812,33 @@ interg.figs <- function(){
                               rel_heights = c(32/100, 42/100)
                               )
   
-  fig.interg.2   <<- plot_grid( fig.bar.intergr.ghgr.t , 
-                                fig.bar.interg.vop, 
-                               align = "h", 
-                                nrow = 2, 
-                                ncol = 1 , 
-                                 rel_heights = c(32/100, 40/100))
-  
   
   ggsave("fig.interg.1.jpeg", fig.interg.1   , path = "Figures.out", width=610, height=1040, units="px", scale=1.65)
 #  ggsave("fig.interg.1.jpeg", fig.interg.1   , path = "Figures.out", width=430, height=710, units="px", scale=2.5)
   
   ggsave("fig.bar.intergr.ghgr.t.jpeg", fig.bar.intergr.ghgr.t.b  , path = "Figures.out", width=780, height=480, units="px", scale=2.5)
   ggsave("fig.bar.interg.vop.jpeg", fig.bar.interg.vop.b  , path = "Figures.out", width=780, height=480, units="px", scale=2.5)
+  
+  
+ 
+  
+  fig.vop   <<- plot_grid(   fig.bar.intrag.vop , 
+                             fig.bar.interg.vop, 
+                            align = "h", 
+                            nrow = 1, 
+                            ncol = 2 , 
+                            rel_widths = c(78/100, 22/100))
+  
+  fig.ghg   <<- plot_grid(  fig.barintrag.ghgr.t  , 
+                            fig.bar.intergr.ghgr.t, 
+                                align = "h", 
+                                nrow = 1, 
+                                ncol = 2 , 
+                                rel_widths = c(78/100, 22/100))
+  
+  ggsave("fig.vop.jpeg",  fig.vop   , path = "Figures.out", width=1350, height=510, units="px", scale=2.5)
+  
+  ggsave("fig.bar.ghgr.t.jpeg",  fig.ghg  , path = "Figures.out", width=1350, height=510, units="px", scale=2.5)
   
   
   
@@ -2678,13 +2743,14 @@ names(Typ.data)[names(Typ.data) == 'cv_precip'] <- 'Rainfall.cv'
 
 path_out = '.\\Figures.out\\'
 
-Typology.data.file.name = paste(path_out,'Typology_data.xlsx',sep = '')
+Typology.data.file.name = paste(path_out,'Typology_data.csv',sep = '')
 
-write.xlsx(T.df, Typology.data.file.name, sheetName = "Sheet1")
+write.csv(T.df, Typology.data.file.name)
 
-write.xlsx(Typ.data  , Typology.data.file.name )
+write.csv(Typ.data  , Typology.data.file.name )
 
 comp <<- comp
+setwd(main.dir) 
 
 }  # END TYPOLOGY CODE
 run.typology()
@@ -2697,6 +2763,8 @@ fig.barintrag.ghgr.t   # 810, 320
 fig.bar.intrag.vop
 
 # System comparisons
+fig.interg.yd.act
+fig.interg.yg
 fig.bar.intergr.ghgr.t.b
 fig.bar.interg.vop.b
 
@@ -2707,13 +2775,16 @@ fig.tree.mass.b
 fig.compart.bmass 
 fig.compart.CO2r
 
-Typology.data.file.name = paste(path_out, 'Typology_data.xlsx',sep = '')
+#Typology.data.file.name = paste(path_out, 'Typology_data.xlsx',sep = '')
+#write.xlsx(T.df, Typology.data.file.name )
+
+Typology.data.file.name = paste(path_out, 'Typology_data.csv',sep = '')
 
 
-write.xlsx(T.df, Typology.data.file.name )
+write.csv(T.df, Typology.data.file.name )
 
 
-View(T.df)
+#View(T.df)
 
 # Summary stats by typology and typ
 summary(  comp[comp$typ == 1 & comp$typology == current.typology & (comp$yld_pc_attain_plot != Inf) , 'total_N_fert_applied_Mg_per_ha'])
