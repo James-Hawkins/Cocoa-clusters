@@ -17,7 +17,7 @@ typology.settings <- function(){
   
   # Acceptable options are complete, ward/ward.d2 , average
   # Best option is ward.d2
-  cluster.method <<- "ward.D2" 
+ #cluster.method <<- "ward.D2" 
    method <- cluster.method
   cluster.method.trad <<-  method 
   cluster.method.hysh <<-    method 
@@ -139,6 +139,7 @@ typology.data <- function(){
    vr.list <<- c('district',
                #Production characteristics
                'Variety',
+               'cc.catg.str',
                'years_since_planted',
                'cc.production.cycle',
                'cm.plot.monocrop.bool',
@@ -275,33 +276,28 @@ run.typology <- function( ){
 #  T.df <- T.df[ !is.na(T.df$Biomass.C.dens.per.tree.sh.tree.Mg) & T.df$Biomass.C.dens.per.tree.sh.tree.Mg < 5 ,]
   
  # T.df <- T.df[ !is.na(T.df$Biomass.C.dens.interc.litter.Mg) & T.df$Biomass.C.dens.interc.litter.Mg < 16 ,]
-  T.df <- T.df[ !is.na(T.df$yld_pc_attain_plot) & T.df$yld_pc_attain_plot < 100 ,]
+  T.df <- T.df[ !is.na(T.df$yld_pc_attain_plot) & T.df$yld_pc_attain_plot <= 100.000 ,]
   
   
   T.df <- T.df[ !is.na(T.df$shade.tree.to.cm.tree.ratio) & !(T.df$shade.tree.to.cm.tree.ratio < 0) & !(T.df$shade.tree.to.cm.tree.ratio*100 > 100 ) ,]
   
-  print(paste('Number of observations included: ',nrow(T.df)))
+  print(paste('Number of observations included: ', nrow(T.df)  ))
   
-  amaz.ids <- T.df[!is.na(T.df$Variety) &
-                      T.df$Variety  == 'Amazonia' & !is.na(T.df$plot.quant.shade.trees.ha )  
-                    #  !(T.df$hhID %in%  hh_exclude.cc.yd.typ) 
-                    & (T.df$yld_pc_attain_plot < 100) 
+  amaz.ids <- T.df[T.df$cc.catg.str  == 'Amazonia' & 
+                     (T.df$yld_pc_attain_plot < 100) 
                     ,'hhID']
   
-  hysun.ids <- T.df[!is.na(T.df$Variety) &
-                       T.df$Variety  == 'Hybrid' & !is.na(T.df$plot.quant.shade.trees.ha ) & 
+  hysun.ids <- T.df[ T.df$cc.catg.str  == 'Hybrid sun' & 
                        !(T.df$hhID %in%  hh_exclude.cc.yd.typ) 
                      & (T.df$yld_pc_attain_plot < 100) &
                        T.df$plot.quant.shade.trees.ha < thres.shade.trees.ha &
                        T.df$plot.overstory.crown < 2.5
                      ,'hhID']
   
-  hysh.ids <- T.df[!is.na(T.df$Variety) &
-                       T.df$Variety  == 'Hybrid' & !is.na(T.df$plot.quant.shade.trees.ha ) & 
-                       !(T.df$hhID %in%  hh_exclude.cc.yd.typ) 
-                     & (T.df$yld_pc_attain_plot < 100) &
-                       T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha  &
-                      T.df$plot.overstory.crown > 2.5
+  hysh.ids <- T.df[ T.df$cc.catg.str  == 'Hybrid shade' & 
+                      (T.df$yld_pc_attain_plot < 100) 
+                     #  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha  &
+                     # T.df$plot.overstory.crown > 2.5
                      ,'hhID']
   
     hysh.plots <- T.df[ T.df$hhID %in% hysh.ids ,]
@@ -931,7 +927,7 @@ fig.intrag.dt.prep <- function(){
                   'Hardwood lumber',
                   'Annual crops',
                   'Fruit trees',
-                  'Agrocommodity coproducts')
+                  'Other agcommodities')
     
     
     rows <- seq(1:(3*5*length(rev.catg )))
@@ -1106,7 +1102,7 @@ fig.intrag.dt.prep <- function(){
   ordered.revenue.categories <<- c('Cocoa'
                                   , 'Fruit trees' , 
                                   'Annual crops',
-                                  'Agrocommodity coproducts',
+                                  'Other agcommodities',
                                   'Fuelwood',
                                   'Hardwood lumber')
   
@@ -1128,9 +1124,9 @@ fig.settings <- function(){
   bar.chart.border.color <<- 'black'
   bar.chart.border.thickness <<- 0.049735
  
-  fig.ghg.leg.x.coord  <<- 0.14 
+  fig.ghg.leg.x.coord  <<- 0.19 
   fig.ghg.leg.y.coord <<-  0.3
-  fig.vop.leg.x.coord <<- 0.155
+  fig.vop.leg.x.coord <<- 0.19
   fig.vop.leg.y.coord <<- 0.7
   
  bar.width <<- 0.65
@@ -1153,7 +1149,7 @@ fig.settings <- function(){
  point.size <<- 3
  
  y.tick.fs <<- 8.5
- x.tick.fs <<- 9.0
+ x.tick.fs <<- 8.0
  y.tit.sz <<- 9.5
  facet.tx.size <<- 10
  x.tick.angle <<- 270.0  
@@ -1170,11 +1166,11 @@ fig.settings <- function(){
  fig.ghg.y.lim.min <<- -14
    
    
- intrag.leg.key.h.ghg <<- 0.40
- intrag.leg.key.w.ghg <<- 0.40
+ intrag.leg.key.h.ghg <<- 0.36
+ intrag.leg.key.w.ghg <<- 0.36
  
- intrag.leg.key.h.vop <<- 0.40
- intrag.leg.key.w.vop <<- 0.40
+ intrag.leg.key.h.vop <<- 0.36
+ intrag.leg.key.w.vop <<- 0.36
    
  intrag.leg.space.x.ghg <<- 0.6
  intrag.leg.space.y.ghg <<- 0.175
@@ -1182,8 +1178,8 @@ fig.settings <- function(){
  intrag.leg.space.x.vop <<-  intrag.leg.space.x.ghg 
  intrag.leg.space.y.vop <<- intrag.leg.space.y.ghg
    
- intrag.fig.ghg.leg.text.fs <<- 9
- intrag.fig.vop.leg.text.fs <<- 9
+ intrag.fig.ghg.leg.text.fs <<- 8.5
+ intrag.fig.vop.leg.text.fs <<- 8.5
    
  # Variable ranges
  min.x.intrag.ghgr.int <<- 1.15 * min(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated) - na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated))
@@ -1252,7 +1248,7 @@ intrag.figs <- function(){
     ) +
     scale_fill_manual(labels = labels_emis_srcs  , values = colors_emis_srcs ) +
     xlab('')  +
-    ylab(bquote(bold('Net GHG emissions (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')')))  +
+    ylab(bquote('Net GHG emissions (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')'))  +
     facet_wrap( Typology ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
     scale_y_continuous(
       limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) ,breaks = seq(-14.0, 2.0, by = 2), 
@@ -1288,15 +1284,13 @@ intrag.figs <- function(){
       panel.border = element_rect(colour = "black",
                                   fill=NA, size=1))
   
-
-  
   fig.bar.intrag.vop.b <- ggplot( data = vop.dat[, ]  )  +
     geom_bar(aes(y = value.mn  , x = Type.str.fill, fill = Revenue.category) , position="stack", stat="identity",  width = bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness)+
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Type.str.fill) , width= error.bar.width , size = error.bar.size , color = nvp.error.bar.color
     ) +
     scale_fill_manual(labels = labels_rev_srcs  , values = colors_rev_srcs )+
     xlab('')+
-    ylab(bquote(bold('Value of production (1000 USD '*ha^-1*' '*yr^-1*')    ')))+
+    ylab(bquote('Value of production (1000 USD '*ha^-1*' '*yr^-1*')    '))+
     facet_wrap( Typology ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
     scale_y_continuous(
       limits = c(0.0, 3.3) ,breaks = seq(0.0, 3.25, by = 0.5),
@@ -1662,13 +1656,6 @@ interg.figs <- function(){
     ylab('') +
    facet_wrap(  facet.lab ~ . , ncol = 1, nrow = 1 , scales = "free_x")   +
     coord_cartesian( ylim = c(fig.ghg.y.lim.min, fig.ghg.y.lim.max)) +
-   # ylab(bquote('Net GHG-e (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')   '))  +
-      # facet_wrap( facet.lab ~ . , ncol = 3, nrow = 1 , scales = "free_x")   +
-    #scale_y_continuous(
-      #limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) 
-      #breaks = seq( fig.ghg.y.lim.min  , fig.ghg.y.lim.max, by = 2.0),
-     # labels = scales::number_format(accuracy = 0.1)
-    # )  +
     guides(fill = guide_legend(byrow = TRUE)) +
     theme(
       legend.text = element_text(size = interg.fig.ghg.leg.text.fs),
@@ -1681,16 +1668,7 @@ interg.figs <- function(){
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
-      # Legend
-      legend.key.size = unit(.42, 'cm'),
       legend.position = "none",
-      legend.key.height = unit(interg.leg.key.h.ghg, 'cm'),
-      legend.key.width = unit(interg.leg.key.w.ghg, 'cm'),
-      legend.spacing.y = unit(fig.bar.inter.ghg.legend.row.spacing.cm, 'cm'),
-      legend.spacing.x = unit(0.45, 'cm'),
-      legend.margin = margin(.00005,bar.interg.legend.right.margin ,.00005,bar.interg.legend.left.margin),
-      legend.box.margin = margin(.00005,.00005,.00005,0.00005),
-      legend.title = element_blank(),
       axis.title.y = element_text(size =    fig.interg.ghg.y.tit.fs),
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
@@ -1704,10 +1682,9 @@ interg.figs <- function(){
     scale_fill_manual(labels = labels_rev_srcs  , values = colors_rev_srcs) +
     xlab('') +
     ylab('') +
-  #  ylab(bquote('Value of production ('*10^3*' USD '*ha^-1*' '*yr^-1*')   ')) +
-        scale_y_continuous(
-      limits = c(-.15, 1.5) ,breaks = seq(0, 1.5, by = 0.25),
-      labels = scales::number_format(accuracy = 0.1))  +
+        #scale_y_continuous(
+     # limits = c(-.15, 1.5) ,breaks = seq(0, 1.5, by = 0.25),
+    #  labels = scales::number_format(accuracy = 0.1))  +
     guides(fill = guide_legend(byrow = TRUE)) +
     facet_wrap(  facet.lab ~ . , ncol = 1, nrow = 1 , scales = "free_x")   +
     coord_cartesian( ylim = c(fig.vop.y.lim.min, fig.vop.y.lim.max)) +
@@ -1724,16 +1701,7 @@ interg.figs <- function(){
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
-      # Legend
-      legend.key.size = unit(.42, 'cm'),
       legend.position = "none",
-      legend.key.height = unit(interg.leg.key.h.vop, 'cm'),
-      legend.key.width = unit(interg.leg.key.w.vop, 'cm'),
-      legend.spacing.y = unit(fig.bar.inter.nvp.row.spacing.cm, 'cm'),
-      legend.spacing.x = unit(0.45, 'cm'),
-      legend.margin = margin(.00005, bar.interg.legend.right.margin ,.00005, bar.interg.legend.left.margin),
-      legend.box.margin = margin(.00005,.00005,.00005,.00005),
-      legend.title = element_blank(),
       axis.title.y = element_blank(),
       #axis.title.y = element_text(size =  fig.interg.vop.y.tit.fs),
       # axis.text.x=element_blank(),
@@ -1831,6 +1799,10 @@ interg.figs <- function(){
     
 }
 interg.figs()
+
+
+fig.ghg
+fig.vop
 
 
 fig.bar.intergr.ghgr.t
@@ -2745,8 +2717,16 @@ run.typology()
 # Type comparisons
 fig.intrag.yg
 fig.intrag.yd.act
+
+
 fig.barintrag.ghgr.t   # 810, 320
 fig.bar.intrag.vop
+
+fig.yield
+
+fig.ghg  # ideal dimensions 860, 390
+fig.vop # ideal dimensions 860, 390
+
 
 # System comparisons
 fig.interg.yd.act
