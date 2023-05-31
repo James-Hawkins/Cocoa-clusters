@@ -51,11 +51,15 @@ system.summmary <- function(){
   nrow(farmers[farmers$Variety == 'Amazonia' & !is.na(farmers$Variety) & !is.na(farmers$plot.quant.shade.trees.ha ),])
   
   
-  tot.sample <-  27+120+35
+  tot.sample <- nrow(farmers)
   
   nrow(farmers[farmers$Variety == 'Hybrid' & !is.na(farmers$Variety) & farmers$plot.quant.shade.trees.ha <= thres.shade.trees.ha,])  /   tot.sample
   nrow(farmers[farmers$Variety == 'Hybrid' & !is.na(farmers$Variety)& farmers$plot.quant.shade.trees.ha > thres.shade.trees.ha,])  /   tot.sample
   nrow(farmers[farmers$Variety == 'Amazonia' & !is.na(farmers$Variety),]) /   tot.sample
+  
+  nrow(farmers[farmers$Variety == 'Hybrid' & !is.na(farmers$Variety) & farmers$plot.quant.shade.trees.ha <= thres.shade.trees.ha,])  
+  nrow(farmers[farmers$Variety == 'Hybrid' & !is.na(farmers$Variety)& farmers$plot.quant.shade.trees.ha > thres.shade.trees.ha,])  
+  nrow(farmers[farmers$Variety == 'Amazonia' & !is.na(farmers$Variety),]) 
   
   
   # variable summary 
@@ -308,7 +312,7 @@ run.typology <- function( ){
                  #   & !is.na(T.df$cc.catg.str)
                      & T.df$plot.quant.large.shade.trees.ha < thres.shade.trees.ha
                     #   T.df$plot.quant.shade.trees.ha < thres.shade.trees.ha #&
-                   #  &  T.df$plot.overstory.crown < 2.5
+                   # &  T.df$plot.overstory.crown < 2.5
                      ,'hhID']
   
   hysh.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
@@ -316,7 +320,7 @@ run.typology <- function( ){
                   #  & !is.na(T.df$cc.catg.str)
                      & T.df$Variety == 'Hybrid' 
                      &  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha # &
-                    #  T.df$plot.overstory.crown > 2.5
+                   # &  T.df$plot.overstory.crown > 2.5
                      ,'hhID']
   
     hysh.plots <- T.df[ T.df$hhID %in% hysh.ids ,]
@@ -897,265 +901,6 @@ comp[comp$typology=='Hybrid shade' & comp$typ.str ==4 , 'hhID']
 
 
 # Data prep for figures
-fig.intrag.dt.prep.x <- function(){
-  
-    #Absolute GHG data
-    ghg.ab.dat.var.names <- c ('Typology',
-                            'Type',
-                            'Type.str' , 
-                            'typ.str.fill',
-                            'Emission.category',
-                            'value.mn',
-                            'value.sd',
-                            'tot.value.mn',
-                            'tot.value.var',
-                            'tot.value.sd',
-                            'tot.value.95pci')
-    
-    emis.catg <- c(
-      'N2O syn',
-                   'N2O organic',
-                   'CO2 seqn. shade',
-                   'CO2 seqn. cocoa',
-                   'CO2 seqn. fruit',
-                   'CO2 seqn. other'
-                   )
-    
-    
-    rows <- seq( 1 : (3*5*length(emis.catg)) )
-    
-    ghg.ab.dat <- data.frame(  matrix(ncol = length(ghg.ab.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , ghg.ab.dat.var.names )))
-
-    View(ghg.ab.dat)
-    
-    #VOP prep
-    # Value of production 
-    vop.dat.var.names <- c ('Typology',
-                            'Type',
-                            'Type.str' , 
-                            'typ.str.fill',
-                            'Revenue category',
-                            'value.mn',
-                            'value.sd',
-                            'tot.value.mn',
-                            'tot.value.var',
-                            'tot.value.sd',
-                            'tot.value.95pci')
-    
-    rev.catg <- c('Cocoa',
-                  'Fuelwood',
-                  'Hardwood lumber',
-                  'Annual crops',
-                  'Fruit trees',
-                  'Other agcommodities')
-    
-    
-    rows <- seq(1:(3*5*length(rev.catg )))
-    
-    vop.dat <- data.frame(  matrix(ncol = length(vop.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , vop.dat.var.names )))
-    
-    #var.names.old <- c('lc.net.VOP.1000.usd.per.ha.frac.rev.basis.cc',
-                 #  'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.fuelw',
-                 # 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.hardw',
-                 #  'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop',
-                  # 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.frt',
-                  # 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ag.cmd'
-  #  )
-    
-    var.names <- c('lc.net.VOP.1000.usd.per.ha.cc',
-                   'lc.net.VOP.1000.usd.per.ha.fuelw',
-                   'lc.net.VOP.1000.usd.per.ha.hardw',
-                   'lc.net.VOP.1000.usd.per.ha.ann.crop',
-                   'lc.net.VOP.1000.usd.per.ha.frt',
-                   'lc.net.VOP.1000.usd.per.ha.ag.cmd'
-    )
-    
-    
-    
-    
-    ghg.row.count <- 1
-    vop.row.count <- 1
-    
-
-    for (t1 in  typologies) {
-      
-      for (t2 in 1:5){
-        
-        if (typ.uncertainty == 1) {
-      ids.to.include <- comp[comp$typ == t2 & comp$typology == t1 & !is.na(comp$typology) & !is.na(comp$typ) , 'hhID']
-       uncert.analysis(comp,ids.to.include)
-        }
-       
-        # Absolute GHG emission uncertainty
-        for (cat in emis.catg){
-          
-        
-        #  var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
-          
-          if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq.pe' }
-          if (cat == emis.catg[3] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe'  }
-          if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-          if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-          if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
-
- 
-          # vr <- var.names[]
-       #   print(paste(var))
-          
-          ghg.ab.dat[ghg.row.count, 'Emission.category'] <-  cat
-          
-          ghg.ab.dat[ghg.row.count, 'Typology' ] <- t1
-          ghg.ab.dat[ghg.row.count, 'Type' ] <- t2
-          
-          ghg.ab.dat[ghg.row.count, 'Type.str' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str' ] )
-          ghg.ab.dat[ghg.row.count, 'Type.str.fill' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str.fill' ] )
-          
-          
-         # value <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-          
-          ghg.ab.dat[ghg.row.count, 'value.mn' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-         
-         #  if ((cat == emis.catg[2]) | (cat == emis.catg[1])) {
-            
-            #ghg.ab.dat[ghg.row.count, 'value.mn' ] <- 0
-         # }
-          ghg.ab.dat[ghg.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-          
-         #  Aggregated values
-        #  if ((cat == emis.catg[6]) ) {
-            
-           # tally <- 0
-           # for (cc in emis.catg){
-              
-              #name <- c
-             # tally %+=% ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == cc & !is.na(ghg.ab.dat$value.mn), 'value.mn' ]
-              
-            #}
-          #  ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- tally
-         # }
-          #(  ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == 'N2O syn', 'N2O syn' ] +
-                                                            # ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == 'N2O organic', 'N2O organic' ] +
-                                                            # ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == 'CO2 seqn. shade', 'CO2 seqn. shade' ] +
-                                                            # ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == 'CO2 seqn. cocoa', 'CO2 seqn. cocoa' ] +
-                                                            # ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == 'CO2 seqn. fruit', 'CO2 seqn. fruit' ] +
-                                                            # ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$typ  == t2 & ghg.ab.dat$Emission.category == 'CO2 seqn. other', 'CO2 seqn. other' ]) }
-                                                               
-          ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
-          
-           ghg.ab.dat[ghg.row.count, 'tot.value.var' ] <- sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ]))
-          
-          ghg.ab.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
-          ghg.ab.dat[ghg.row.count, 'tot.value.95pci' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.95pci' ]))
-
-          ghg.row.count %+=% 1
-          
-        }
-        
-        # VOP uncertainty
-        for (cat in rev.catg){
-          
-          
-         # var <-  var.names[ var.names == cat ]
-          
-          if (cat == rev.catg[1]) {var <- 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.cc' }
-          if (cat == rev.catg[2]) {var <- 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.fuelw' }
-          if (cat == rev.catg[3]) {var <- 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.hardw' }
-          if (cat == rev.catg[4]) {var <- 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop' }
-          if (cat == rev.catg[5]) {var <- 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.frt' }
-          if (cat == rev.catg[6]) {var <- 'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ag.cmd' }
-          
-          
-          # vr <- var.names[]
-       #   print(paste(var))
-          
-          vop.dat[vop.row.count, 'Revenue.category'] <-  cat
-          
-          vop.dat[vop.row.count, 'Typology' ] <- t1
-          vop.dat[vop.row.count, 'Type' ] <- t2
-          
-          vop.dat[vop.row.count, 'Type.str' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str' ] )
-          vop.dat[vop.row.count, 'Type.str.fill' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str.fill' ] )
-          
-          
-          vop.dat[vop.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-          
-          vop.dat[vop.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-          
-          # Aggregated values
-          vop.dat[vop.row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha']))
-          vop.dat[vop.row.count, 'tot.value.var' ] <- sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha']))
-          
-          vop.dat[vop.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.sd']))
-          vop.dat[vop.row.count, 'tot.value.95pci' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.95pci']))
-          
-          vop.row.count %+=% 1
-          
-        }
-      }
-    }
-    
-    
-   
-  #  ghg.ab.dat <<- ghg.ab.dat
-   # vop.dat <<- vop.dat
-    
-
-  
-
-  
-  
-  # Factor specification
-  #   Absolute GHG
-  ghg.ab.dat$Typology <- factor( ghg.ab.dat$Typology   , levels= ordered.typologies)
-  
-  ordered.ab.emission.categories <<- c(  'CO2 seqn. other',
-                                         'CO2 seqn. fruit',
-                                         'CO2 seqn. cocoa',
-                                         'CO2 seqn. shade',
-                                         'N2O cocoa litter',
-                                         'N2O shade litter',   
-                                         'N2O intercrop litter',
-                                         'N2O other',
-                                         'N2O syn' )
-  
-  ordered.ab.emission.categories <<- c(  'CO2 seqn. other',
-                                         'CO2 seqn. fruit',
-                                         'CO2 seqn. cocoa',
-                                         'CO2 seqn. shade',
-                                         'N2O organic',
-                                         'N2O syn' )
-                                      
-                                     
- ghg.ab.dat$Emission.category <- factor( ghg.ab.dat$Emission.category   ,  ordered.ab.emission.categories)
-  
-  ghg.ab.dat[,'Type.str'] <- factor(  ghg.ab.dat[,'Type.str'], levels = ordered.typ)
-  
-  ghg.ab.dat <<-  ghg.ab.dat
-  
-  
-  # VOP
-  
-  vop.dat$Typology <- factor( vop.dat$Typology   , levels= ordered.typologies)
-  
-  ordered.revenue.categories <<- c('Cocoa'
-                                  , 'Fruit trees' , 
-                                  'Annual crops',
-                                  'Other agcommodities',
-                                  'Fuelwood',
-                                  'Hardwood lumber')
-  
-  
-  vop.dat$Revenue.category <- factor( vop.dat$Revenue.category   , ordered.revenue.categories)
-  
-  
-  vop.dat[,'Type.str'] <- factor(  vop.dat[,'Type.str'], levels = ordered.typ)
-  
-  vop.dat <<-  vop.dat
-  
-  View(ghg.ab.dat)
-}  
-#fig.intrag.dt.prep()
 
 fig.intrag.dt.prep <- function(){
   
@@ -1649,14 +1394,14 @@ fig.intrag.yd.act.b <<- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(com
 
 
 
-fig.intrag.yg <<- annotate_figure(fig.intrag.yg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs , fig.lab.face = 'bold')
+fig.intrag.yg <<- annotate_figure(fig.intrag.yg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs )
 
-fig.intrag.yd.act <<- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "c", fig.lab.pos ="top.left", fig.lab.size = label.fs , fig.lab.face = 'bold')
+fig.intrag.yd.act <<- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "c", fig.lab.pos ="top.left", fig.lab.size = label.fs )
 
 
-fig.barintrag.ghgr.t <<-  annotate_figure(fig.barintrag.ghgr.t,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
+fig.barintrag.ghgr.t <<-  annotate_figure(fig.barintrag.ghgr.t,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs)
 
-fig.bar.intrag.vop  <<- annotate_figure( fig.bar.intrag.vop.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
+fig.bar.intrag.vop  <<- annotate_figure( fig.bar.intrag.vop.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs)
 
 
 #fig.intrag.1   <- plot_grid( fig.intrag.yg , fig.intrag.yd.act ,  align = "v", nrow = 1  )
@@ -2014,11 +1759,11 @@ interg.figs <- function(){
     )  
   
 
-  fig.interg.yg <- annotate_figure( fig.interg.yg.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs , fig.lab.face = 'bold')   
-  fig.interg.yd.act <-  annotate_figure( fig.interg.yd.act.b,   fig.lab = "d", fig.lab.pos ="top.left", fig.lab.size = label.fs , fig.lab.face = 'bold')  
+  fig.interg.yg <- annotate_figure( fig.interg.yg.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs )   
+  fig.interg.yd.act <-  annotate_figure( fig.interg.yd.act.b,   fig.lab = "d", fig.lab.pos ="top.left", fig.lab.size = label.fs )  
   
-  fig.bar.intergr.ghgr.t <<- annotate_figure( fig.bar.intergr.ghgr.t.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
-  fig.bar.interg.vop <<- annotate_figure(fig.bar.interg.vop.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs, fig.lab.face = 'bold')
+  fig.bar.intergr.ghgr.t <<- annotate_figure( fig.bar.intergr.ghgr.t.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs)
+  fig.bar.interg.vop <<- annotate_figure(fig.bar.interg.vop.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs)
   
   
   fig.yield   <<- plot_grid(  fig.interg.yg,
@@ -2032,9 +1777,9 @@ interg.figs <- function(){
   
   ggsave("fig.yield.jpeg", fig.yield   , path = "Figures.out", width=610, height=1040, units="px", scale=1.65)
 
-  fig.intrag.yg <<- annotate_figure(fig.intrag.yg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs , fig.lab.face = 'bold')
+  fig.intrag.yg <<- annotate_figure(fig.intrag.yg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs )
   
-  fig.intrag.yd.act <<- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs , fig.lab.face = 'bold')
+  fig.intrag.yd.act <<- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs )
   
   
   fig.yg   <<- plot_grid(   fig.intrag.yg , 
