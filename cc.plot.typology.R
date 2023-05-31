@@ -279,7 +279,7 @@ run.typology <- function( ){
   
     # Typology sample selection
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# T.df <- T.df[ !is.na(T.df$Biomass.C.dens.total.litter.Mg) & T.df$Biomass.C.dens.total.litter.Mg < 100,]
+ #T.df <- T.df[ !is.na(T.df$Biomass.C.dens.total.litter.Mg) & T.df$Biomass.C.dens.total.litter.Mg < 100,]
  # T.df <- T.df[ !is.na(T.df$tree.count.per.ha) & T.df$tree.count.per.ha > 600 & T.df$tree.count.per.ha < 1600,]
 
   #T.df <- T.df[ !is.na(T.df$lc.N2O.Mg.total.alloc) & T.df$lc.N2O.Mg.total.alloc < .3844 ,]
@@ -298,28 +298,27 @@ run.typology <- function( ){
 
   amaz.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
                      #& !is.na(T.df$Variety) 
-                    & (T.df$Variety == 'Amazonia') 
-                    # & T.df$cc.catg.str == 'Amazonia'
-                 #   & !is.na(T.df$cc.catg.str)
+                  #  & (T.df$Variety == 'Amazonia') 
+                     & T.df$cc.catg.str == 'Amazonia'
+                    & !is.na(T.df$cc.catg.str)
                     # T.df$Variety  == 'Amazonia' #& !is.na(T.df$plot.quant.large.shade.trees.ha )  
                    # & T.df$plot.quant.large.shade.trees.ha > thres.shade.trees.ha
-                   #  !(T.df$hhID %in%  hh_exclude.cc.yd.typ) 
                    ,'hhID']
   
   hysun.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
-                     #& T.df$cc.catg.str == 'Hybrid sun'
-                     & T.df$Variety == 'Hybrid' 
-                 #   & !is.na(T.df$cc.catg.str)
-                     & T.df$plot.quant.large.shade.trees.ha < thres.shade.trees.ha
+                     & T.df$cc.catg.str == 'Hybrid sun'
+                    # & T.df$Variety == 'Hybrid' 
+                    & !is.na(T.df$cc.catg.str)
+                    # & T.df$plot.quant.large.shade.trees.ha < thres.shade.trees.ha
                     #   T.df$plot.quant.shade.trees.ha < thres.shade.trees.ha #&
                    # &  T.df$plot.overstory.crown < 2.5
                      ,'hhID']
   
   hysh.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
-                 #   & T.df$cc.catg.str == 'Hybrid shade'
-                  #  & !is.na(T.df$cc.catg.str)
-                     & T.df$Variety == 'Hybrid' 
-                     &  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha # &
+                   & T.df$cc.catg.str == 'Hybrid shade'
+                    & !is.na(T.df$cc.catg.str)
+                  #   & T.df$Variety == 'Hybrid' 
+                    # &  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha # &
                    # &  T.df$plot.overstory.crown > 2.5
                      ,'hhID']
   
@@ -915,16 +914,7 @@ fig.intrag.dt.prep <- function(){
                              'tot.value.var',
                              'tot.value.sd',
                              'tot.value.95pci')
-  
-  emis.catg <- c('N2O syn',
-                 'N2O cocoa litter',
-                 'N2O shade litter',
-                 'N2O intercrop litter',
-                 'N2O other',
-                 'CO2 seqn. shade',
-                 'CO2 seqn. cocoa',
-                 'CO2 seqn. fruit',
-                 'CO2 seqn. other')
+
   
   emis.catg <- c(
     'N2O syn',
@@ -979,6 +969,9 @@ fig.intrag.dt.prep <- function(){
   ghg.row.count <- 1
   vop.row.count <- 1
   
+  ghg.ab.dat[ , 'tot.value.mn' ] <- 0
+  
+
   
   for (t1 in  typologies) {
     
@@ -991,20 +984,6 @@ fig.intrag.dt.prep <- function(){
       
       # Absolute GHG emission uncertainty
       for (cat in emis.catg){
-        
-        
-        #  var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
-        
-      #  if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
-       # if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.shadet.resd.total.Mg.CO2eq.pe'   }
-      #  if (cat == emis.catg[3] ) {var <- 'lc.N2O.organic.resd.total.Mg.CO2eq.pe'}
-       # if (cat == emis.catg[4] ) {var <- 'lc.N2O.organic.inter.resd.total.Mg.CO2eq.pe' }
-       # if (cat == emis.catg[5] ) {var <- 'lc.N2O.organic.other.total.Mg.CO2eq.pe' }
-       # if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe'  }
-        # if (cat == emis.catg[7] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-        #  if (cat == emis.catg[8] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-        # if (cat == emis.catg[9] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
-        
         
         if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq' }
         if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq' }
@@ -1024,13 +1003,18 @@ fig.intrag.dt.prep <- function(){
         ghg.ab.dat[ghg.row.count, 'Type.str' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str' ] )
         ghg.ab.dat[ghg.row.count, 'Type.str.fill' ] <- unique(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'typ.str.fill' ] )
         
-        ghg.ab.dat[ghg.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+        ghg.ab.dat[ghg.row.count, 'value.mn' ] <- mean(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var] , na.rm = TRUE)
         
-        ghg.ab.dat[ghg.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+        val <- ghg.ab.dat[ghg.row.count, 'value.mn' ]
+        
+        ghg.ab.dat[ghg.row.count, 'value.sd' ] <-  sd( comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var] , na.rm = TRUE)
         
         #  Aggregated values
-        ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ]))
-        ghg.ab.dat[ghg.row.count, 'tot.value.var' ] <- sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ]))
+        #ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$Type == t2 & !is.na(ghg.ab.dat$Type) & !is.na(ghg.ab.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
+        
+          
+      #  ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ], na.rm = TRUE)
+        ghg.ab.dat[ghg.row.count, 'tot.value.var' ] <- sd(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ] , na.rm = TRUE)
         
         ghg.ab.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
         ghg.ab.dat[ghg.row.count, 'tot.value.95pci' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.95pci' ]))
@@ -1067,7 +1051,7 @@ fig.intrag.dt.prep <- function(){
    
         
         vop.dat[vop.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-        
+       
         vop.dat[vop.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
         
         # Aggregated values
@@ -1084,6 +1068,25 @@ fig.intrag.dt.prep <- function(){
   }
   
   
+  ghg.row.count  <- 1
+  ghg.ab.dat[, 'tot.value.mn' ] <- 0
+  for (t1 in  typologies) {
+    
+    for (t2 in 1:5){
+      for (cat in emis.catg){
+      
+      val <- ghg.ab.dat[ghg.row.count, 'value.mn' ]
+      ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$Type == t2 & !is.na(ghg.ab.dat$Type) & !is.na(ghg.ab.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
+      ghg.row.count %+=% 1
+    }
+    }
+  }
+  
+  # View(ghg.ab.dat)
+  #(-0.856791474
+  #-1.384693266
+  #-0.436240308
+  #-0.366667725)
   
   #  ghg.ab.dat <<- ghg.ab.dat
   # vop.dat <<- vop.dat
@@ -1101,11 +1104,21 @@ fig.intrag.dt.prep <- function(){
                                          'CO2 seqn. fruit',
                                          'CO2 seqn. cocoa',
                                          'CO2 seqn. shade',
-                                         'N2O cocoa litter',
-                                         'N2O shade litter',   
-                                         'N2O intercrop litter',
+                                      #   'N2O cocoa litter',
+                                        # 'N2O shade litter',   
+                                         #'N2O intercrop litter',
                                          'N2O organic',
                                          'N2O syn' )
+  
+ # emis.catg <- c(
+   # 'N2O syn',
+    #'N2O organic',
+   # 'CO2 seqn. shade',
+   # 'CO2 seqn. cocoa',
+   # 'CO2 seqn. fruit',
+   # 'CO2 seqn. other'
+ # )
+  
   
   
   ghg.ab.dat$Emission.category <- factor( ghg.ab.dat$Emission.category   ,  ordered.ab.emission.categories)
@@ -1134,7 +1147,8 @@ fig.intrag.dt.prep <- function(){
   
   vop.dat <<-  vop.dat
   
-  # View(ghg.ab.dat)
+ 
+  
   
 }  
 fig.intrag.dt.prep()
@@ -1259,8 +1273,6 @@ fig.settings <- function(){
  
 }
 fig.settings()
-
-
 
 intrag.figs <- function(){
   
@@ -1452,6 +1464,7 @@ fig.interg.dt.prep <- function(){
   
   row.count <- 1
 
+  inter.ghg.ab.dat[, 'tot.value.mn' ] <- 0
   
   for (t1 in typologies) {
       for (cat in emis.catg){
@@ -1459,27 +1472,32 @@ fig.interg.dt.prep <- function(){
         
         var <-  ghg.ab.dat.var.names[ ghg.ab.dat.var.names == cat ]
         
-        if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq.pe' }
-        if (cat == emis.catg[3] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr.pe' }
-        if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr.pe' }
+        if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq' }
+        if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq' }
+        if (cat == emis.catg[3] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr' }
+        if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr' }
+        if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' }
+        if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr' }
         
         # vr <- var.names[]
         print(paste(var))
+        
+        ids <- comp[comp$typology ==  t1  & !is.na(comp$typology)  , 'hhID']
         
         inter.ghg.ab.dat[row.count, 'Emission.category'] <-  cat
         
         inter.ghg.ab.dat[row.count, 'Typology' ] <- t1
 
-        inter.ghg.ab.dat[row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
-        
-        inter.ghg.ab.dat[row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1   & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+        inter.ghg.ab.dat[row.count, 'value.mn' ] <- mean(comp[comp$hhID %in% ids , var] , na.rm =  TRUE)
+        val <-   inter.ghg.ab.dat[row.count, 'value.mn' ]
+        inter.ghg.ab.dat[row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$hhID %in% ids , var]))
         
         #  Aggregated values
-        inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.pe' ]))
-        inter.ghg.ab.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
+        #inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ])
+        inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
+        
+        
+        inter.ghg.ab.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
         
         inter.ghg.ab.dat[row.count, 'facet.lab' ] <-  'System aggregates'
         row.count %+=% 1
@@ -1490,9 +1508,21 @@ fig.interg.dt.prep <- function(){
       }
   }
   
+  inter.ghg.ab.dat[, 'value.mn' ] <- 0
+  ghg.row.count <- 1
   
-  inter.ghg.ab.dat <<- inter.ghg.ab.dat
+  for (t1 in typologies) {
+    for (cat in emis.catg){
+      
+      val <-   inter.ghg.ab.dat[row.count, 'value.mn' ]
+    inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
+      
+      ghg.row.count %+=% 1
+    }
+  }
   
+  
+ # View(inter.ghg.ab.dat)
   # Value of production
   vop.dat.var.names <- c ('Typology',
                           'Revenue category',
@@ -1543,18 +1573,20 @@ fig.interg.dt.prep <- function(){
         
         # vr <- var.names[]
         print(paste(var))
+        ids <- comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'hhID']
+        
         
         interg.vop.dat[row.count, 'Revenue.category'] <-  cat
         
         interg.vop.dat[row.count, 'Typology' ] <- t1
         
-        interg.vop.dat[row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+        interg.vop.dat[row.count, 'value.mn' ] <- mean(na.omit(comp[comp$hhID %in% ids, var]))
         
-        interg.vop.dat[row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+        interg.vop.dat[row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$hhID %in% ids , var]))
         
         # Aggregated values
-        interg.vop.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 &  !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha']))
-        interg.vop.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 &  !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.sd']))
+        interg.vop.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$hhID %in% ids, 'lc.net.VOP.1000.usd.per.ha']))
+        interg.vop.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids , 'lc.net.VOP.1000.usd.per.ha.sd']))
         interg.vop.dat[row.count, 'facet.lab' ] <-  'System aggregates'
         row.count %+=% 1
         
@@ -1568,16 +1600,9 @@ fig.interg.dt.prep <- function(){
   inter.ghg.ab.dat$Typology <- factor( inter.ghg.ab.dat$Typology   , levels= ordered.typologies)
   
   ordered.ab.emission.categories <<-   ordered.ab.emission.categories
-  
-  
+  inter.ghg.ab.dat$Emission.category <- factor( inter.ghg.ab.dat$Emission.category   ,  ordered.ab.emission.categories)
   
   display.names.ab.emission <<-  labels_emis_srcs
-  
-
-  
-
-  
-  inter.ghg.ab.dat$Emission.category <- factor( inter.ghg.ab.dat$Emission.category   ,  ordered.ab.emission.categories)
   
   #inter.ghg.ab.dat[,'Type.str'] <- factor(  inter.ghg.ab.dat[,'Type.str'], levels = ordered.typ)
   
@@ -1594,8 +1619,11 @@ fig.interg.dt.prep <- function(){
   
   interg.vop.dat <<-  interg.vop.dat
   
+  View(inter.ghg.ab.dat)
 }  
 fig.interg.dt.prep()
+
+
 
 interg.figs <- function(){
   
@@ -1646,10 +1674,9 @@ interg.figs <- function(){
   fig.vop.y.lim.min <<-  0
   fig.vop.y.lim.max <<- 1.5
 
-  
-  
+
   fig.bar.intergr.ghgr.t.b <<- ggplot( data = inter.ghg.ab.dat[,]  )  +
-    geom_bar(aes(y = value.mn  , x = Typology, fill = Emission.category) , position="stack", stat="identity" , width = fig.interg.ghg.bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness )+
+    geom_bar(aes(y = value.mn  , x = Typology, fill = Emission.category) , position="stack", stat="identity" , width = fig.interg.ghg.bar.width , colour=bar.chart.border.color , size=bar.chart.border.thickness ) +
     geom_point(aes(y = tot.value.mn    , x = Typology),stat = "identity",  shape = point.type, size= point.size , color = point.color.border , fill=point.color.fill ,   position=position_dodge(.9))  +
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Typology) , width= error.bar.width , size = error.bar.size , color = error.bar.color
     ) +
@@ -2737,6 +2764,7 @@ setwd(main.dir)
 
 }  # END TYPOLOGY CODE
 run.typology()
+
 
 
 # Type comparisons
