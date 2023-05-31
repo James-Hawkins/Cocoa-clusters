@@ -253,7 +253,6 @@ typology.data <- function(){
      for (v in 1:length(vr.list)){
        
        var <- vr.list[v]
-        print(var)
        
        v <- comp[comp$hhID == id ,var ]
        if (is.numeric(v)){
@@ -293,29 +292,25 @@ run.typology <- function( ){
   
   T.df <- T.df[ !is.na(T.df$shade.tree.to.cm.tree.ratio) & !(T.df$shade.tree.to.cm.tree.ratio < 0) & !(T.df$shade.tree.to.cm.tree.ratio*100 > 100 ) ,]
   
-  print(paste('Number of observations included: ', nrow(T.df)  ))
   
 
-  amaz.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
-                     #& !is.na(T.df$Variety) 
+  amaz.ids <- T.df[  #& !is.na(T.df$Variety) 
                   #  & (T.df$Variety == 'Amazonia') 
-                     & T.df$cc.catg.str == 'Amazonia'
+                      T.df$cc.catg.str == 'Amazonia'
                     & !is.na(T.df$cc.catg.str)
                     # T.df$Variety  == 'Amazonia' #& !is.na(T.df$plot.quant.large.shade.trees.ha )  
                    # & T.df$plot.quant.large.shade.trees.ha > thres.shade.trees.ha
                    ,'hhID']
   
-  hysun.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
-                     & T.df$cc.catg.str == 'Hybrid sun'
+  hysun.ids <- T.df[  T.df$cc.catg.str == 'Hybrid sun'
                     # & T.df$Variety == 'Hybrid' 
-                    & !is.na(T.df$cc.catg.str)
+                   &  !is.na(T.df$cc.catg.str)
                     # & T.df$plot.quant.large.shade.trees.ha < thres.shade.trees.ha
                     #   T.df$plot.quant.shade.trees.ha < thres.shade.trees.ha #&
                    # &  T.df$plot.overstory.crown < 2.5
                      ,'hhID']
   
-  hysh.ids <- T.df[ (T.df$yld_pc_attain_plot <= 100) 
-                   & T.df$cc.catg.str == 'Hybrid shade'
+  hysh.ids <- T.df[   T.df$cc.catg.str == 'Hybrid shade'
                     & !is.na(T.df$cc.catg.str)
                   #   & T.df$Variety == 'Hybrid' 
                     # &  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha # &
@@ -327,11 +322,17 @@ run.typology <- function( ){
     amaz.plots <- T.df[ T.df$hhID %in% amaz.ids ,]
     
     
-    nrow(hysh.plots)
-    nrow(hysun.plots)
-    nrow(amaz.plots)
+    n.hysh <- nrow(hysh.plots)
+    n.hysn <-nrow(hysun.plots)
+    n.amz <-nrow(amaz.plots)
     
+    n.total <- n.hysn + n.hysh+ n.amz
 
+    print(paste('Total number of observations included: ', n.total  ))
+    print(paste('For hybrid sun: ',  n.hysn   ))
+    print(paste('For hybrid shade: ',  n.hysh   ))
+    print(paste('For Amazonia: ',    n.amz  ))
+    
   #  hist(farmers$plot.quant.shade.trees )
   #  hist(farmers$plot.overstory.crown )
     
@@ -711,8 +712,7 @@ run.typology <- function( ){
 
     clusters <-   unique(data$typ)
     
-    print(paste('clusters are '),clusters)
-    
+
   #  rm( cluster.names)
   #  rm(  cluster.values.ordered)
     
@@ -767,7 +767,7 @@ run.typology <- function( ){
     
     current.typology <- T
     
-  print(paste('current typology is', T))
+
     
     if (T == 'Amazonia') {
       t.nm <-  t.nm.amz
@@ -777,7 +777,6 @@ run.typology <- function( ){
       t.nm <-  t.nm.hy.sun
       data <- hc.hysun}
 
-  print(paste('t name is', t.nm))
   
   
     comp[comp$hhID %in% data[,    'hhID'] ,   'typology']  <- T
@@ -786,8 +785,6 @@ run.typology <- function( ){
     
     
     for (i in seq(1:5))  {
-      
-      print(paste(i))
       
       data[data$typ ==   i & !is.na(data$typ)  ,'typ.str']  <-  match(i,t.nm) 
       data[data$typ ==   i & !is.na(data$typ)  ,'typ']  <- i
@@ -1480,7 +1477,6 @@ fig.interg.dt.prep <- function(){
         if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr' }
         
         # vr <- var.names[]
-        print(paste(var))
         
         ids <- comp[comp$typology ==  t1  & !is.na(comp$typology)  , 'hhID']
         
@@ -1508,13 +1504,14 @@ fig.interg.dt.prep <- function(){
       }
   }
   
-  inter.ghg.ab.dat[, 'value.mn' ] <- 0
+ # View(inter.ghg.ab.dat)
+  inter.ghg.ab.dat[, 'tot.value.mn' ] <- 0
   ghg.row.count <- 1
   
   for (t1 in typologies) {
     for (cat in emis.catg){
       
-      val <-   inter.ghg.ab.dat[row.count, 'value.mn' ]
+      val <-   inter.ghg.ab.dat[ ghg.row.count, 'value.mn' ]
     inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
       
       ghg.row.count %+=% 1
@@ -1572,7 +1569,6 @@ fig.interg.dt.prep <- function(){
         
         
         # vr <- var.names[]
-        print(paste(var))
         ids <- comp[comp$typology ==  t1  & !is.na(comp$typology) & !is.na(comp$typ) , 'hhID']
         
         
@@ -1619,7 +1615,7 @@ fig.interg.dt.prep <- function(){
   
   interg.vop.dat <<-  interg.vop.dat
   
-  View(inter.ghg.ab.dat)
+  
 }  
 fig.interg.dt.prep()
 
@@ -2152,8 +2148,6 @@ tb.typ.pract <- function(){
       
       ids <- comp[!is.na(comp$typ) & comp$typ == tp & (comp$typology == T) , 'hhID'] 
 
-      print(paste('Typology ', T ,' and type ' , t ,' have ', ids))
-      
       # Variable 1
       v1.m <- mean( na.omit(comp[(comp$hhID %in% ids ) , v1] ))
       v1.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v1] ))
@@ -2340,8 +2334,6 @@ tb.typ.clim <- function(){
     for ( t in 1:(length(ordered.typ))){
       
       tp <- t
-      
-      print(paste('Typology ', T ,' and type ' , t ,' have ', ids))
       
       ids <- comp[!is.na(comp$typ) & comp$typ == tp & (comp$typology == T) , 'hhID'] 
       
@@ -2775,7 +2767,7 @@ fig.intrag.yd.act
 fig.barintrag.ghgr.t   # 810, 320
 fig.bar.intrag.vop
 
-fig.yield
+fig.yd 
 
 fig.ghg  # ideal dimensions 860, 390
 fig.vop # ideal dimensions 860, 390
