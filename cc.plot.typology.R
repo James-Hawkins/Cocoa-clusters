@@ -8,7 +8,7 @@ typology.settings <- function(){
   typ.uncertainty <<- 0
   
   cluster.method <<- "ward.D2" 
-  cluster.method <<- "ward" 
+  cluster.method <<- "ward.D" 
   cluster.method <<-"complete"
   cluster.method <<-"average"
   cluster.method <<-"mcquitty"
@@ -1130,7 +1130,7 @@ fig.intrag.dt.prep <- function(){
   vop.dat$Typology <- factor( vop.dat$Typology   , levels= ordered.typologies)
   
   ordered.revenue.categories <<- c('Cocoa'
-                                   , 'Fruit trees' , 
+                                   ,'Fruit trees', 
                                    'Annual crops',
                                    'Other agrocommodities',
                                    'Fuelwood',
