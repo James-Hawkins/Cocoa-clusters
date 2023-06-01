@@ -316,8 +316,8 @@ run.typology <- function( ){
                   #  & (T.df$Variety == 'Amazonia') 
                       T.df$cc.catg.str == 'Amazonia'
                     & !is.na(T.df$cc.catg.str) 
-                   # &  T.df$plot.quant.shade.trees.ha <= 25
-                   #&  T.df$plot.quant.shade.trees.ha != 0
+                 #   &  T.df$plot.quant.shade.trees.ha <= 25
+                 #  &  T.df$plot.quant.shade.trees.ha != 0
                     # T.df$Variety  == 'Amazonia' #& !is.na(T.df$plot.quant.large.shade.trees.ha )  
                    # & T.df$plot.quant.large.shade.trees.ha > thres.shade.trees.ha
                    ,'hhID']
