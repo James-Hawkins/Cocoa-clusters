@@ -91,6 +91,14 @@ system.summmary <- function(){
   
   
   nrow(farmers[farmers$cc.catg.str == 'Hybrid shade'  &  farmers$plot.quant.shade.trees.ha > 25, ])
+  nrow(farmers[farmers$cc.catg.str == 'Hybrid shade'  &  farmers$plot.quant.shade.trees.ha > 13, ])
+  nrow(farmers[farmers$cc.catg.str == 'Hybrid shade'  &  farmers$plot.quant.shade.trees.ha > 0 &  farmers$plot.quant.shade.trees.ha < 25, ])
+  
+  nrow(farmers[farmers$cc.catg.str == 'Hybrid sun'  , ])
+  nrow(farmers[farmers$cc.catg.str == 'Hybrid sun'  &  !is.na(farmers$plot.quant.shade.trees.ha) &  farmers$plot.quant.shade.trees.ha == 0, ])
+  nrow(farmers[farmers$cc.catg.str == 'Hybrid sun'  &  !is.na(farmers$plot.quant.shade.trees.ha) &  farmers$plot.quant.shade.trees.ha > 0 &  farmers$plot.quant.shade.trees.ha < 14, ])
+  
+  
   nrow(farmers[farmers$Variety == 'Hybrid shade'  &  farmers$plot.quant.shade.trees.ha == 0, ])
   nrow(farmers[farmers$Variety == 'Hybrid shade'  &  farmers$plot.quant.shade.trees.ha > 0 &  farmers$plot.quant.shade.trees.ha <= 25, ])
   
@@ -804,7 +812,7 @@ run.typology <- function( ){
     comp[comp$hhID %in% data[data$typ == i,    'hhID'] ,   'typ.str']  <- match(i,t.nm) 
     comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ']  <- i
     
-    cluster.name <- str_c('Cluster numero ', i)
+    cluster.name <- str_c('Cluster number ', i)
     #system.name <- T
     
     comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ.str.fill']  <-  cluster.name
@@ -839,7 +847,23 @@ ordered.typ <<- c(
 
 
 comp[,'typ.str'] <- factor(comp[,'typ.str'] , levels = ordered.typ)
-#comp[,'typ.str'] <- droplevels(comp[,'typ.str'] )
+
+
+ordered.typ.fill <- c(
+  'Cluster number 5',
+  'Cluster number 1',
+  'Cluster number 2',
+  'Cluster number 4',
+  'Cluster number 3'
+)
+
+
+
+
+#comp[,'typ.str.fill'] <- droplevels(comp[,'typ.str.fill'] )
+#comp[,'typ.str.fill'] <- factor(comp[,'typ.str.fill'] , levels = ordered.typ.fill)
+comp$typ.str.fill <- factor(comp$typ.str.fill , levels = ordered.typ.fill , ordered =  TRUE)
+
 
 
 #cc.typ <- comp[!is.na(comp$typology),]
@@ -1082,8 +1106,8 @@ fig.intrag.dt.prep <- function(){
   
   vop.dat <<-  vop.dat
   
-  View(vop.dat)
-  View(ghg.ab.dat)
+ # View(vop.dat)
+ # View(ghg.ab.dat)
   
 }  
 fig.intrag.dt.prep()
@@ -1119,12 +1143,12 @@ fig.settings <- function(){
  
  y.tick.fs <<- 8.5
  x.tick.fs <<- 8.0
- y.tit.sz <<- 9.5
+ y.tit.sz <<- 8.5
  
  x.tick.angle <<- 270.0  
  
  facet.tx.size <<- 10
- facet.tx.size.yd <<- 9
+ facet.tx.size.yd <<- 8.5
  
  label.fs <<- 11.5
  
@@ -1293,16 +1317,16 @@ intrag.figs <- function(){
   
 
   fig.intrag.yg.b <- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)     ,]  ) +
-  geom_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str , group = typ.str) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten)+
+  geom_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str, group = typ.str) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten)+
  xlab('') +
     scale_y_continuous(limits = c(0.0, 100.0) ,breaks = seq(0, 100, by = 25), labels = scales::number_format(accuracy = 1.0))+
-  ylab('Percent attainable yield (%)')+
+  ylab('  Percent attainable yield (%)')+
   facet_wrap( typology ~ . , ncol =3, nrow = 1, scales = 'free_x' )   + 
- # scale_y_continuous(labels = scales::number_format(accuracy = 1.0))+
-  theme(
-    plot.margin = unit(c(p.mg.top,p.mg.right,p.mg.bottom,p.mg.left), "cm"),
+   # scale_x_discrete(labels = comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)   &  !is.na(comp$typ.str.fill)   ,'typ.str.fill'] ) +
+theme(
+    plot.margin = unit(c(p.mg.top,p.mg.right,-.2,p.mg.left), "cm"),
     axis.ticks.x = element_blank(),
-   # axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = x.tick.fs),
+    #axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = x.tick.fs),
     axis.text.x = element_blank(),
     axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
     panel.grid.major = element_blank(),
@@ -1314,18 +1338,19 @@ intrag.figs <- function(){
     panel.border = element_rect(colour = "black", fill=NA, size=1)
   )
 
-fig.intrag.yd.act.b <- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)     ,]  ) +
- geom_boxplot(aes(y = cc.yd.lt.mn.Mg.ha  , x = typ.str.fill, group = typ.str.fill) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
+
+fig.intrag.yd.act.b <- ggplot( data = comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)   &  !is.na(comp$typ.str.fill)   ,]  ) +
+ geom_boxplot(aes(y = cc.yield.fn.Mg.per.ha  , x = typ.str.fill , group = typ.str.fill) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
   xlab('') +
- #   scale_y_reverse(limits = c(0, 2.5))+
-  ylab(' (Mg ha yr)')+
   ylab(bquote('Actual yield (Mg  '*ha^-1*' '*yr^-1*')    '))+
-  facet_wrap( typology ~ . , ncol =5, nrow = 1 , scales = 'free_x')   + 
-   scale_y_continuous(limits = c(0.0, 3.0) ,breaks = seq(0, 3, by = .5), labels = scales::number_format(accuracy = 0.1))+
+  facet_wrap( typology ~ . , ncol =5, nrow = 1 )   + 
+ # scale_x_discrete(labels = comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)   &  !is.na(comp$typ.str.fill)   ,'typ.str.fill'] ) +
+#  scale_x_discrete(labels = c('n1','n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8' )) +
+  scale_y_continuous(limits = c(0.0, 3.0) ,breaks = seq(0, 3, by = .5), labels = scales::number_format(accuracy = 0.1))+
   theme(
     plot.margin = unit(c(p.mg.top,p.mg.right,p.mg.bottom,p.mg.left*.9), "cm"),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = x.tick.fs),
+    axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = x.tick.fs, face = 'italic'),
    # axis.text.x = element_blank(),
     axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
     panel.grid.major = element_blank(),
@@ -1614,7 +1639,7 @@ interg.figs <- function(){
       axis.ticks.x = element_blank(),
       axis.ticks.y = element_blank(),
       axis.text.y =  element_blank(),
-     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs),
+     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs , face = 'italic'),
      # axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = fig.interg.ghg.y.tick.fs),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
@@ -1645,7 +1670,7 @@ interg.figs <- function(){
       axis.ticks.x = element_blank(),
       axis.ticks.y = element_blank(),
      # axis.text.x = element_blank(),
-     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs),
+     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.ghg.x.tick.fs , face = 'italic'),
     #  axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.5, size = fig.interg.vop.x.tick.fs),
      # axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
     axis.text.y = element_blank(),
@@ -1695,7 +1720,7 @@ interg.figs <- function(){
       axis.ticks.x = element_blank(),
       axis.ticks.y = element_blank(),
       axis.text.y = element_blank(),
-      axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = fig.interg.yg.x.tick.fs),
+      axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = fig.interg.yg.x.tick.fs , face = 'italic'),
       # axis.text.x = element_blank(),
      # axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = fig.interg.yg.y.tick.fs),
       panel.grid.major = element_blank(),
