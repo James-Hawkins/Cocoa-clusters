@@ -316,8 +316,8 @@ run.typology <- function( ){
                   #  & (T.df$Variety == 'Amazonia') 
                       T.df$cc.catg.str == 'Amazonia'
                     & !is.na(T.df$cc.catg.str) 
-                   # &  T.df$plot.quant.shade.trees.ha <= 25
-                 #  &  T.df$plot.quant.shade.trees.ha <= thres.shade.trees.ha# 0
+                  #  &  T.df$plot.quant.shade.trees.ha <= 25
+                #  &  T.df$plot.quant.shade.trees.ha <= thres.shade.trees.ha# 0
                     # T.df$Variety  == 'Amazonia' #& !is.na(T.df$plot.quant.large.shade.trees.ha )  
                    # & T.df$plot.quant.large.shade.trees.ha > thres.shade.trees.ha
                    ,'hhID']
@@ -325,16 +325,16 @@ run.typology <- function( ){
   hysun.ids <- T.df[  T.df$cc.catg.str == 'Hybrid sun'
                     # & T.df$Variety == 'Hybrid' 
                    &  !is.na(T.df$cc.catg.str)
-                   #  & T.df$plot.quant.shade.trees.ha > 0
-                   &  T.df$plot.quant.large.shade.trees.ha <= thres.shade.trees.ha
+                     & T.df$plot.quant.shade.trees.ha == 0
+                  # &  T.df$plot.quant.large.shade.trees.ha <= thres.shade.trees.ha
                    # &  T.df$plot.overstory.crown < 2.5
                      ,'hhID']
   
   hysh.ids <- T.df[   T.df$cc.catg.str == 'Hybrid shade'
                     & !is.na(T.df$cc.catg.str)
                   #   & T.df$Variety == 'Hybrid' 
-                    # &  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha # &
-                  &  T.df$plot.quant.shade.trees.ha < 26# thres.shade.trees.ha # &  T.df$plot.overstory.crown > 2.5
+                 #    &  T.df$plot.quant.shade.trees.ha > 0 # &
+                  &  T.df$plot.quant.shade.trees.ha <  25#thres.shade.trees.ha # &  T.df$plot.overstory.crown > 2.5
                      ,'hhID']
   
     hysh.plots <- T.df[ T.df$hhID %in% hysh.ids ,]
@@ -1820,7 +1820,7 @@ tb.typ.agfo <- function(){
                 'Amazonia'
                  )
   
-  agfor.dat <- data.frame()
+  agfor.dat <- data.frame( stringsAsFactors=FALSE)
   agfor.dat <- 0
   
   for (T in typologies){
@@ -2016,6 +2016,7 @@ tb.typ.agfo <- function(){
 #  agfor.dat <-  na.omit(agfor.dat[])
   agfor.dat <- agfor.dat[-c(1),]
 
+  
   colnames(agfor.dat) = c('n',
                    'Cocoa tree density (per ha)',
                     'Shade to cocoa trees (%)',   
@@ -2029,14 +2030,21 @@ tb.typ.agfo <- function(){
                     '# trees > 50 m high'
   )
   
-
+ # Encoding(agfor.dat$) <- "bytes"
+  
+  
   path_out = '.\\Figures.out\\'
   fileName = paste(path_out, 'table_typology.agfo.csv',sep = '')
-  write.csv(  agfor.dat  ,  file = fileName)  # Export
+  write.csv.utf8.BOM(  agfor.dat  ,  file = fileName) 
   #  View(agfor.dat)
   
 
   agfor.dat <<- agfor.dat  
+  
+  
+  
+  
+  
 }
 tb.typ.agfo() 
 
@@ -2227,7 +2235,7 @@ tb.typ.pract <- function(){
 
   path_out = '.\\Figures.out\\'
   fileName = paste(path_out, 'table_typology.pract.csv',sep = '')
-  write.csv(  pract.dat  ,   file = fileName)  # Export
+  write.csv.utf8.BOM(  pract.dat  ,   file = fileName)  # Export
   
 }
 tb.typ.pract() 
@@ -2359,7 +2367,7 @@ tb.typ.clim <- function(){
   
   path_out = '.\\Figures.out\\'
   fileName = paste(path_out, 'table_typology_clim.csv',sep = '')
-  write.csv(  cli.dat  ,   file =   fileName )  # Export
+  write.csv.utf8.BOM(  cli.dat  ,   file =   fileName )  # Export
   #View(cli.dat)
   
 }
