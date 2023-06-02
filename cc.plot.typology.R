@@ -316,8 +316,8 @@ run.typology <- function( ){
                   #  & (T.df$Variety == 'Amazonia') 
                       T.df$cc.catg.str == 'Amazonia'
                     & !is.na(T.df$cc.catg.str) 
-                 #   &  T.df$plot.quant.shade.trees.ha <= 25
-                 #  &  T.df$plot.quant.shade.trees.ha != 0
+                   # &  T.df$plot.quant.shade.trees.ha <= 25
+                 #  &  T.df$plot.quant.shade.trees.ha <= thres.shade.trees.ha# 0
                     # T.df$Variety  == 'Amazonia' #& !is.na(T.df$plot.quant.large.shade.trees.ha )  
                    # & T.df$plot.quant.large.shade.trees.ha > thres.shade.trees.ha
                    ,'hhID']
@@ -325,8 +325,8 @@ run.typology <- function( ){
   hysun.ids <- T.df[  T.df$cc.catg.str == 'Hybrid sun'
                     # & T.df$Variety == 'Hybrid' 
                    &  !is.na(T.df$cc.catg.str)
-                    # & T.df$plot.quant.large.shade.trees.ha < thres.shade.trees.ha
-                    #   T.df$plot.quant.shade.trees.ha < thres.shade.trees.ha #&
+                   #  & T.df$plot.quant.shade.trees.ha > 0
+                   &  T.df$plot.quant.large.shade.trees.ha <= thres.shade.trees.ha
                    # &  T.df$plot.overstory.crown < 2.5
                      ,'hhID']
   
@@ -334,7 +334,7 @@ run.typology <- function( ){
                     & !is.na(T.df$cc.catg.str)
                   #   & T.df$Variety == 'Hybrid' 
                     # &  T.df$plot.quant.shade.trees.ha >= thres.shade.trees.ha # &
-                   # &  T.df$plot.overstory.crown > 2.5
+                  &  T.df$plot.quant.shade.trees.ha < 26# thres.shade.trees.ha # &  T.df$plot.overstory.crown > 2.5
                      ,'hhID']
   
     hysh.plots <- T.df[ T.df$hhID %in% hysh.ids ,]
@@ -353,6 +353,10 @@ run.typology <- function( ){
     print(paste('For hybrid shade: ',  n.hysh   ))
     print(paste('For Amazonia: ',    n.amz  ))
     
+    ids.considered <- append(hysh.ids ,hysun.ids  )
+    ids.considered <- append(ids.considered ,amaz.ids  )
+
+    comp[comp$hhID %in% ids.considered , 'typology'] <- NA
   #  hist(farmers$plot.quant.shade.trees )
   #  hist(farmers$plot.overstory.crown )
     
@@ -779,6 +783,7 @@ run.typology <- function( ){
 # assign string names to clusters  
   comp[ ,'typ.str']  <- NA
   comp[ ,'typology']  <- NA
+  comp[ ,'typ.str.fill']  <- NA
   
   # Name types
   for (T in typologies){
@@ -848,23 +853,31 @@ ordered.typ <<- c(
 
 comp[,'typ.str'] <- factor(comp[,'typ.str'] , levels = ordered.typ)
 
-
 ordered.typ.fill <- c(
-  'Cluster number 5',
-  'Cluster number 1',
-  'Cluster number 2',
-  'Cluster number 4',
-  'Cluster number 3'
+  'Cluster num 1',
+  'Cluster num 2',
+  'Cluster num 3',
+  'Cluster num 4',
+  'Cluster num 5'
 )
 
+#comp[comp$typ.str == 4 & !is.na(comp$typ.str) , 'typ.str.fill']
+#comp[comp$typ.str == 5 & !is.na(comp$typ.str) , 'typ.str.fill']
+
+
+comp[comp$typ.str == 1 & !is.na(comp$typ.str) , 'typ.str.fill'] <- 'Cluster num 1'
+comp[comp$typ.str == 2 & !is.na(comp$typ.str) , 'typ.str.fill'] <- 'Cluster num 2'
+comp[comp$typ.str == 3 & !is.na(comp$typ.str) , 'typ.str.fill'] <- 'Cluster num 3'
+comp[comp$typ.str == 4 & !is.na(comp$typ.str) , 'typ.str.fill'] <- 'Cluster num 4'
+comp[comp$typ.str == 5 & !is.na(comp$typ.str) , 'typ.str.fill'] <- 'Cluster num 5'
 
 
 
-#comp[,'typ.str.fill'] <- droplevels(comp[,'typ.str.fill'] )
+#comp$typ.str.fill  <- droplevels(comp$typ.str.fill )
 #comp[,'typ.str.fill'] <- factor(comp[,'typ.str.fill'] , levels = ordered.typ.fill)
 comp$typ.str.fill <- factor(comp$typ.str.fill , levels = ordered.typ.fill , ordered =  TRUE)
 
-
+#comp$typ.str.fill <- 0
 
 #cc.typ <- comp[!is.na(comp$typology),]
 #cc.typ <- cc.typ[,c('yld.pc.attainable.adj','typ' ,'typology')]
@@ -984,7 +997,7 @@ fig.intrag.dt.prep <- function(){
         #ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$Type == t2 & !is.na(ghg.ab.dat$Type) & !is.na(ghg.ab.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
         
           
-      #  ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ], na.rm = TRUE)
+        ghg.ab.dat[ghg.row.count, 'tot.value.mn' ] <- mean(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ], na.rm = TRUE)
         ghg.ab.dat[ghg.row.count, 'tot.value.var' ] <- sd(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ] , na.rm = TRUE)
         
         ghg.ab.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
@@ -1040,14 +1053,14 @@ fig.intrag.dt.prep <- function(){
   
   
   ghg.row.count  <- 1
-  ghg.ab.dat[, 'tot.value.mn' ] <- 0
+ # ghg.ab.dat[, 'tot.value.mn' ] <- 0
   for (t1 in  typologies) {
     
     for (t2 in 1:5){
       for (cat in emis.catg){
       
       val <- ghg.ab.dat[ghg.row.count, 'value.mn' ]
-      ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$Type == t2 & !is.na(ghg.ab.dat$Type) & !is.na(ghg.ab.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
+     # ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$Type == t2 & !is.na(ghg.ab.dat$Type) & !is.na(ghg.ab.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
       ghg.row.count %+=% 1
     }
     }
@@ -1318,7 +1331,8 @@ intrag.figs <- function(){
 
   fig.intrag.yg.b <- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)     ,]  ) +
   geom_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str, group = typ.str) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten)+
- xlab('') +
+  #  geom_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str, group = typ.str) )+
+     xlab('') +
     scale_y_continuous(limits = c(0.0, 100.0) ,breaks = seq(0, 100, by = 25), labels = scales::number_format(accuracy = 1.0))+
   ylab('  Percent attainable yield (%)')+
   facet_wrap( typology ~ . , ncol =3, nrow = 1, scales = 'free_x' )   + 
@@ -1338,15 +1352,16 @@ theme(
     panel.border = element_rect(colour = "black", fill=NA, size=1)
   )
 
-
 fig.intrag.yd.act.b <- ggplot( data = comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)   &  !is.na(comp$typ.str.fill)   ,]  ) +
- geom_boxplot(aes(y = cc.yield.fn.Mg.per.ha  , x = typ.str.fill , group = typ.str.fill) , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
-  xlab('') +
+ geom_boxplot(aes(y = cc.yd.lc.mn.Mg.ha  , x = typ.str.fill , group = typ.str.fill) ,  outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
+ # geom_boxplot(aes(y = cc.yd.lc.mn.Mg.ha  , x = typ.str.fill , group = typ.str.fill)  )+
+   xlab('') +
   ylab(bquote('Actual yield (Mg  '*ha^-1*' '*yr^-1*')    '))+
   facet_wrap( typology ~ . , ncol =5, nrow = 1 )   + 
  # scale_x_discrete(labels = comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)   &  !is.na(comp$typ.str.fill)   ,'typ.str.fill'] ) +
 #  scale_x_discrete(labels = c('n1','n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8' )) +
-  scale_y_continuous(limits = c(0.0, 3.0) ,breaks = seq(0, 3, by = .5), labels = scales::number_format(accuracy = 0.1))+
+  coord_cartesian( ylim = c(0.0, 1.5)) +
+  scale_y_continuous(breaks = seq(0, 3, by = .5), labels = scales::number_format(accuracy = 0.1))+
   theme(
     plot.margin = unit(c(p.mg.top,p.mg.right,p.mg.bottom,p.mg.left*.9), "cm"),
     axis.ticks.x = element_blank(),
@@ -1440,8 +1455,8 @@ fig.interg.dt.prep <- function(){
         inter.ghg.ab.dat[row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$hhID %in% ids , var]))
         
         #  Aggregated values
-        #inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ])
-        inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
+        inter.ghg.ab.dat[row.count, 'tot.value.mn' ] <- mean(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ])
+        #inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
         
         
         inter.ghg.ab.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
@@ -1456,18 +1471,18 @@ fig.interg.dt.prep <- function(){
   }
   
  # View(inter.ghg.ab.dat)
-  inter.ghg.ab.dat[, 'tot.value.mn' ] <- 0
-  ghg.row.count <- 1
+ # inter.ghg.ab.dat[, 'tot.value.mn' ] <- 0
+  #ghg.row.count <- 1
   
-  for (t1 in typologies) {
-    for (cat in emis.catg){
+ # for (t1 in typologies) {
+   # for (cat in emis.catg){
       
-      val <-   inter.ghg.ab.dat[ ghg.row.count, 'value.mn' ]
-    inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
+   #   val <-   inter.ghg.ab.dat[ ghg.row.count, 'value.mn' ]
+   # inter.ghg.ab.dat[inter.ghg.ab.dat$Typology == t1 & !is.na(inter.ghg.ab.dat$Typology), 'tot.value.mn' ] %+=%   (val )
       
-      ghg.row.count %+=% 1
-    }
-  }
+    #  ghg.row.count %+=% 1
+    #}
+  #}
   
   
  # View(inter.ghg.ab.dat)
@@ -1569,8 +1584,6 @@ fig.interg.dt.prep <- function(){
   
 }  
 fig.interg.dt.prep()
-
-
 
 interg.figs <- function(){
   
@@ -2667,6 +2680,9 @@ for (v in climatic.vars){
   
   Typ.data <- cbind(Typ.data  , new.column )
   colnames(Typ.data)[ncol((Typ.data))] <- v
+  
+  
+  setwd(main.dir)
 }
 
 names(Typ.data)[names(Typ.data) == 'elev'] <- 'Elevation.m.asl'
