@@ -6,7 +6,7 @@ typology.settings <- function(){
   
   cluster.method <<- "ward.D2" 
  
-  cluster.method.trad <<-  cluster.method 
+  cluster.method.amaz <<-  cluster.method 
   cluster.method.hysh <<-  cluster.method 
   cluster.method.hysun <<- cluster.method 
   
@@ -278,7 +278,6 @@ run.typology <- function(){
 
   
   # Typology sample selection
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   T.df <- T.df[ !is.na(T.df$tree.count.per.ha) & T.df$tree.count.per.ha > 600 & T.df$tree.count.per.ha < 1600,]
   
   T.df <- T.df[ !( !is.na(T.df$gross.revenue.frt.usd.per.ha) & T.df$gross.revenue.frt.usd.per.ha > 800  & T.df$cc.catg.str != 'Hybrid shade')  ,]
@@ -288,27 +287,15 @@ run.typology <- function(){
   T.df <- T.df[ ( !is.na(T.df$gross.revenue.ann.crop.usd.per.ha) & T.df$gross.revenue.ann.crop.usd.per.ha < 295 )   ,]
   
   T.df <- T.df[ !( !is.na(T.df$gross.revenue.usd.per.ha.frac.frt) & T.df$gross.revenue.usd.per.ha.frac.frt > .340 & T.df$cc.catg.str == 'Hybrid sun')  ,]
-  # T.df <- T.df[ !( !is.na(T.df$gross.revenue.ann.crop.usd.per.ha) & T.df$gross.revenue.ann.crop.usd.per.ha > 340 & T.df$cc.catg.str == 'Hybrid sun')   ,]
-  
-  # T.df <- T.df[ !( !is.na(T.df$lc.net.VOP.1000.usd.per.ha) & T.df$lc.net.VOP.1000.usd.per.ha < .05 & T.df$cc.catg.str == 'Amazonia')  ,]
-  #T.df <- T.df[ ( !( (T.df$lc.net.VOP.1000.usd.per.ha == 0) & T.df$cc.catg.str == 'Amazonia')  ),]
-  
-  # T.df <- T.df[ !is.na(T.df$gross.revenue.usd.per.ha.frac.frt) & T.df$gross.revenue.usd.per.ha.frac.frt < .65 ,]
+
   T.df <- T.df[ !is.na(T.df$total.cocoa.costs.usd.per.ha) & T.df$total.cocoa.costs.usd.per.ha < 450 ,]
-  
-  #T.df <- T.df[ !is.na(T.df$lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop) & T.df$lc.net.VOP.1000.usd.per.ha.frac.rev.basis.ann.crop <= .75 ,]
-  #T.df <- T.df[ !is.na(T.df$lc.net.VOP.1000.usd.per.ha)  ,]
-  
-  # T.df <- T.df[ (T.df$lc.N2O.Mg.total.Mg.CO2eq < 1.5)  ,]
   
   T.df <- T.df[ !is.na(T.df$yld_pc_attain_plot) & T.df$yld_pc_attain_plot <= 100.000 ,]
   
   T.df <- T.df[ !is.na(T.df$shade.tree.to.cm.tree.ratio) & !(T.df$shade.tree.to.cm.tree.ratio < 0) & !(T.df$shade.tree.to.cm.tree.ratio*100 > 100 ) ,]
   
   
-  amaz.ids <- T.df[  #& !is.na(T.df$Variety) 
-                  #  & (T.df$Variety == 'Amazonia') 
-                      T.df$cc.catg.str == 'Amazonia'
+  amaz.ids <- T.df[ T.df$cc.catg.str == 'Amazonia'
                       &  !is.na(T.df$cc.catg.str)
                    ,'hhID']
   
@@ -318,8 +305,6 @@ run.typology <- function(){
   
   hysh.ids <- T.df[   T.df$cc.catg.str == 'Hybrid shade'
                     & !is.na(T.df$cc.catg.str)
-                   # & (T.df$plot.quant.large.shade.trees.ha < 25)
-                  #  & (T.df$plot.quant.shade.trees.ha > thres.shade.trees.ha)
                  ,'hhID']
   
     hysh.plots <- T.df[ T.df$hhID %in% hysh.ids ,]
@@ -341,40 +326,12 @@ run.typology <- function(){
     ids.considered <- append(ids.considered ,amaz.ids  )
 
     comp[comp$hhID %in% ids.considered , 'typology'] <- NA
-  #  hist(farmers$plot.quant.shade.trees )
-  #  hist(farmers$plot.overstory.crown )
-    
 
-  #  farmers <<- na.omit(farmers)
-  #  farmers <<- is.numeric(farmers$cm.tree)
-    
-   # hysh.plots$precip  <- as.numeric(hysh.plots$precip )
-  #  hysun.plots$precip  <- as.numeric(farmers$precip)
-  #  amaz.plots$precip  <- as.numeric(farmers$precip)
-    
-    
- # farmers$precip <- as.numeric(farmers$precip)
- # farmers$elev <- as.numeric(farmers$elev)
- # farmers$temp1_2 <- as.numeric(farmers$temp1_2)
-    
-  
-  
- # hysh.plots <- bc.df[ bc.df$hhID %in% hysh.ids ,]
- # hysun.plots <- bc.df[ bc.df$hhID %in% hysun.ids ,]
- # amaz.plots <- bc.df[ bc.df$hhID %in% amaz.plots ,]
-  
     # Sun
     mfa.hysun <- hysun.plots[ , c(  'hhID',
                                    'total_N_fert_applied_Mg_per_ha',
-                                 # 'total_fert_Nitr_applied_kg_per_ha',
                                     'total_non_N_fert_applied_Mg_per_ha',
                                    'tree.count.per.ha',
-                                #   'shade.tree.to.cm.tree.ratio',
-                                #   'other.short.tree.to.cm.tree.ratio',
-                                    # 'plot.quant.trees.per.ha.greater.than.50.m',
-                                    #   'plot.quant.trees.per.ha.greater.than.35.m',
-                                 #  'plot.quant.trees.per.ha.greater.than.20.m',
-                              #     'unique.tree.species', 
                                    'num_other_root_grain_crops',
                                     'prunes_per_year',
                                     'weeds_per_year',
@@ -404,9 +361,6 @@ run.typology <- function(){
                             'plot.quant.trees.per.ha.greater.than.50.m',
                               'plot.quant.trees.per.ha.greater.than.35.m',
                                'plot.quant.trees.per.ha.greater.than.20.m',
-                    #  'pct.shade.trees.greater.than.50.m',
-                     # 'pct.shade.trees.greater.than.35.m',
-                    #  'pct.shade.trees.greater.than.20.m',
                              'unique.tree.species', 
                                'num_other_root_grain_crops',
                                'prunes_per_year',
@@ -430,18 +384,12 @@ run.typology <- function(){
     # Amazonia
     mfa.amaz <- amaz.plots[ , c(  'hhID',
                                   'total_N_fert_applied_Mg_per_ha',
-                               #   'total_fert_Nitr_applied_kg_per_ha',
                                   'total_non_N_fert_applied_Mg_per_ha',
-                                 # 'shade.tree.to.cm.tree.ratio',
                                  'tree.count.per.ha',
-                                 #'plot.quant.shade.trees.ha',
-                             #    'plot.quant.short.trees.ha',
                              'shade.tree.to.cm.tree.ratio',
-                             #'other.short.tree.to.cm.tree.ratio',
                                   'plot.quant.trees.per.ha.greater.than.50.m',
                                   'plot.quant.trees.per.ha.greater.than.35.m',
                                   'plot.quant.trees.per.ha.greater.than.20.m',
-                                #  'tree.config.cocoa',
                              'unique.tree.species', 
                              'num_other_root_grain_crops',
                                   'prunes_per_year',
@@ -460,14 +408,17 @@ run.typology <- function(){
                              'water.logged'
     )]
     
+    # Define index of vector which represents first qualitative variable 
     hysun.qvars.f.ix <- 11
     amaz.qvars.f.ix <- 16
     hysh.qvars.f.ix <- 17
     
+    # Omit observations with NA
     mfa.hysun <-  na.omit(mfa.hysun)
     mfa.hysh <-  na.omit(mfa.hysh)
     mfa.amaz <-  na.omit(mfa.amaz)
     
+    # Check for variables that are highly correlated
     cor_matrix.hysh <- cor(mfa.hysh[ ,-c(1)])
     cor_matrix.hysun <- cor(mfa.hysh[ ,-c(1)])
     cor_matrix.amaz <- cor(mfa.amaz[ ,-c(1)])
@@ -482,6 +433,7 @@ run.typology <- function(){
     mfa.hysh[,c((hysh.qvars.f.ix+1):ncol(mfa.hysh))] <- as.character(mfa.hysh[,c((hysh.qvars.f.ix+1):ncol(mfa.hysh))])
     
 
+    # RUN PCA MIX algorithm
     # Sun
     hysun.pcamix <- PCAmix(X.quanti=mfa.hysun[,c(2:(hysun.qvars.f.ix))],  
                          X.quali=mfa.hysun[,c((hysun.qvars.f.ix+1):ncol(mfa.hysun))], 
@@ -504,14 +456,14 @@ run.typology <- function(){
                           ndim=25)
     
    
-  # DEFINE VARIABLES USED IN CLUSTERING FOR EACH SYSTEM # 
-    
+  # Specify variables used in clustering for each system based on results of PCA mix # 
+
     hysun.pcamix$eig
     hysun.pcamix$quanti$contrib.pct
     hysun.pcamix$quali$contrib.pct
     
     "
-    SUN
+    HYBRID SUN
     First 11 PCs ; 10 - 12 quantitative variable correspondence
     9. max temp
     10. othe fert , tree density , weeding
@@ -525,15 +477,7 @@ run.typology <- function(){
                                  'total_non_N_fert_applied_Mg_per_ha',
                                  'yld_pc_attain_plot',
                               'tree.count.per.ha',
-                           #  'plot.quant.trees.per.ha.greater.than.50.m',
-                            # 'plot.quant.trees.per.ha.greater.than.35.m',
-                              # 'plot.quant.trees.per.ha.greater.than.20.m',
-                             # 'shade.tree.to.cm.tree.ratio',
-                            #  'num_other_root_grain_crops' , 
-                              #'unique.tree.species',
                                 'weeds_per_year',
-                               #  'precip',
-                                # 'elev',
                                  'temp1_2',
                               'water.logged',
                                  'fungi.app.cocoa',
@@ -564,24 +508,12 @@ run.typology <- function(){
     hc.hysh <- hysh.plots[ , c('hhID',
                                'yld_pc_attain_plot',
                              'total_N_fert_applied_Mg_per_ha',
-                          #    'total_non_N_fert_applied_Mg_per_ha',
                                'tree.count.per.ha',
-                       #      'other.short.tree.to.cm.tree.ratio' ,
                               'shade.tree.to.cm.tree.ratio',
-                           #  'pct.shade.trees.greater.than.35.m',
-                          # 'pct.shade.trees.greater.than.50.m',
-                          # 'pct.shade.trees.greater.than.35.m',
                           'plot.quant.trees.per.ha.greater.than.35.m',
-                         #  'pct.shade.trees.greater.than.20.m',
-                           # 'unique.tree.species',
                              'num_other_root_grain_crops',
                              'elev',
                              'temp1_2',
-                            #'temp',
-                        # 'precip',
-                              # 'prunes_per_year',
-                         #   'weeds_per_year',
-                         #  'tree.config.cocoa',
                            'water.logged',
                            'fungi.app.cocoa',
                            'insecti.app.cocoa',
@@ -606,20 +538,11 @@ run.typology <- function(){
     11. tall trees and short trees , yield
     "
     hc.amaz <- amaz.plots[ , c('hhID',
-                               #  'shade.tree.to.cm.tree.ratio',
                                  'num_other_root_grain_crops',
-                               #'num_other_tree_crops',
-                               #  'other.tree.to.cm.tree.ratio',
                                'plot.quant.trees.per.ha.greater.than.50.m',
-                               #'plot.quant.trees.per.ha.greater.than.35.m',
                                'plot.quant.trees.per.ha.greater.than.20.m',
                                'total_N_fert_applied_Mg_per_ha',
-                              # 'unique.tree.species',
-                            #   'total_non_N_fert_applied_Mg_per_ha',
                                'yld_pc_attain_plot',
-                               #'precip',
-                               #  'prunes_per_year',
-                              # 'weeds_per_year',
                                'elev',
                                'temp1_2',
                             'water.logged',
@@ -633,14 +556,14 @@ run.typology <- function(){
                                'detect.bool.stemborer' 
     )]
     
-    
-
+    # Omit observations that are NA
     hc.hysh <-  na.omit(hc.hysh)
     hc.hysun <-  na.omit( hc.hysun)
     hc.amaz <-  na.omit( hc.amaz)
     
-    # calculate opt num of clusters
-    # calculate gap statistic for each number of clusters (up to 10 clusters)
+    # Calculate gap statistic for each system 
+    # Note this is commented out because it only need be done once to determine number of clusters 
+    # (and in subsequent runs of function need not be included)
    # gap_stat.hysh <- clusGap(hc.hysh[,c(2:length(hc.hysh))], FUN = hcut, nstart = 250, K.max = 30, B = 50)
    # gap_stat.hysun <- clusGap(hc.hysun[,c(2:length(hc.hysun))], FUN = hcut, nstart = 250, K.max = 30, B = 50)
    # gap_stat.amaz<- clusGap(hc.amaz[,c(2:length(hc.amaz))], FUN = hcut, nstart = 250, K.max = 30, B = 50)
@@ -650,80 +573,72 @@ run.typology <- function(){
     # fviz_gap_stat( gap_stat.hysun)
    # fviz_gap_stat(gap_stat.amaz )
     
+
+    # ~~~~~~ CLUSTERING ~~~~~~ #
     
-    
-    # CLUSTERING 
-    
-    # Shade
+    # Hybrid shade
     d <- daisy(hc.hysh[,c(2:length(hc.hysh))], metric="gower")
     fit <- hclust(d=d, method= cluster.method.hysh)
     
    #plot.new()
   #  plot(fit, hang=-1)
-    groups.hysh <- cutree(fit, k = num.clusts.hysh)   # "k=" defines the number of clusters you are using   
+    groups.hysh <- cutree(fit, k = num.clusts.hysh)     
  #  rect.hclust(fit, k=5, border="red")
     
-    # Sun
+    # Amazonia
+    d <- daisy(hc.amaz[,c(2:length(hc.amaz))], metric="gower")
+    fit <- hclust(d=d, method= cluster.method.amaz)
+    
+    groups.amaz <- cutree(fit, k=  num.clusts.amz)   
+    
+    # Hybrid sun
     d <- daisy(hc.hysun[,c(2:length(hc.hysun))], metric="gower")
     fit <- hclust(d=d, method=cluster.method.hysun)
     
-  #  plot.new()
-   # plot(fit, hang=-1)
-    groups.hysun <- cutree(fit, k = num.clusts.hysn )   # "k=" defines the number of clusters you are using   
-   #rect.hclust(fit, k=5, border="red")
-    
-    # Traditional
-    d <- daisy(hc.amaz[,c(2:length(hc.amaz))], metric="gower")
-    fit <- hclust(d=d, method= cluster.method.trad)
+    #  plot.new()
+    # plot(fit, hang=-1)
+    groups.hysun <- cutree(fit, k = num.clusts.hysn )   
+    #rect.hclust(fit, k=5, border="red")
     
    # plot.new()
    # plot(fit, hang=-1)
-    groups.amaz <- cutree(fit, k=  num.clusts.amz)   # "k=" defines the number of clusters you are using   
+   
    # rect.hclust(fit, k=5, border="red")
     
     
-    hc.amaz <- cbind(hc.amaz , cluster = groups.amaz )
-    hc.hysun <- cbind(hc.hysun , cluster = groups.hysun)
-    hc.hysh <- cbind(hc.hysh , cluster = groups.hysh)
-    
-  
+    # Assign new name for cluster variable
     hc.hysh$typ <- (hc.hysh$cluster)
     hc.hysun$typ <-(hc.hysun$cluster)
     hc.amaz$typ <- (hc.amaz$cluster)
     
-    # Re-assign comp dataframe with typology clusters
+    # Column bind cluster variables with cluster assignments
+    
+    hc.hysun <- cbind(hc.hysun , cluster = groups.hysun)
+    hc.hysh <- cbind(hc.hysh , cluster = groups.hysh)
+    hc.amaz <- cbind(hc.amaz , cluster = groups.amaz )
+  
+  
+    
+    hc.hysh$typ <- as.factor(hc.hysh$cluster)
+    hc.hysun$typ <- as.factor(hc.hysun$cluster)
+    hc.amaz$typ <- as.factor(hc.amaz$cluster)
+    
+    
+    # Define the system to which each cluster exists in comp dataframe
     comp[comp$hhID %in% hc.hysh$hhID , 'cc.plot.sys'] <- 'Hybrid shade'
     comp[comp$hhID %in% hc.hysun$hhID , 'cc.plot.sys'] <- 'Hybrid sun'
     comp[comp$hhID %in% hc.amaz$hhID , 'cc.plot.sys'] <- 'Traditional'
     
     
-    
-    hc.hysh$typ <- as.factor(hc.hysh$cluster)
-    hc.hysun$typ <- as.factor(hc.hysun$cluster)
-    hc.amaz$typ <- as.factor(hc.amaz$cluster)
-        
-        
-  # Name types
+  # Name production systems (typologies)
   typologies <<- c(
     'Hybrid sun'
-             ,     'Hybrid shade'
-           ,    'Amazonia'
+     ,'Hybrid shade'
+     ,'Amazonia'
     )
   
-  vars.stat <- c('cc.yd.lt.mn.Mg.ha',
-                 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr',
-                 'yld_pc_attain_plot',
-                 'lc.net.VOP.1000.usd.per.ha',
-                 'Biomass.C.dens.total.Mg.ha',
-                 'Biomass.C.dens.cc.tree.Mg',
-                 'Biomass.C.dens.sh.tree.Mg',
-                 'Biomass.C.dens.sh.litter.Mg',
-                 'Biomass.C.dens.cc.litter.Mg',
-                 'Biomass.C.dens.interc.litter.Mg'
-                 )
 
-
- # ORDER CLUSTERS ACCORDING TO YIELD (ASCENDING) 
+ # Order clusters in ascending order of yiedl
   for (T in typologies){
     
     if (T == 'Amazonia') {
@@ -752,8 +667,7 @@ run.typology <- function(){
         if (c == 7) {cluster.names <- append (cluster.names , 7)}
       
          variable.to.order <- mean(comp[comp$hhID %in% ids,'yld_pc_attain_plot'])
-         #variable.to.order <- median(comp[comp$hhID %in% ids,'yld_pc_attain_plot'])
-           
+         
         if (c == 1) {cluster.values <- append (cluster.values ,  variable.to.order)}
         if (c == 2) {cluster.values <- append (cluster.values ,  variable.to.order)}
         if (c == 3) {cluster.values <- append (cluster.values ,  variable.to.order)}
@@ -767,7 +681,6 @@ run.typology <- function(){
 
          cluster.dat <- data.frame(column_1 = cluster.names , column_2 = cluster.values.ordered)
          
-
          cluster.dat.ordered <- cluster.dat[order(cluster.dat$column_2),]
 
          if (T == 'Amazonia'){ t.nm.amz <- cluster.dat.ordered[,c(1)]  }
@@ -777,12 +690,12 @@ run.typology <- function(){
    
   }
 
-# assign string names to clusters  
+# Create new variables in comp dataframe related to cluster results
   comp[ ,'typ.str']  <- NA
   comp[ ,'typology']  <- NA
   comp[ ,'typ.str.fill']  <- NA
   
-  # Name types
+  # Assign names representing cluster result to each observation of comp dataframe
   for (T in typologies){
     
     current.typology <- T
@@ -799,48 +712,67 @@ run.typology <- function(){
       num.clusters <- num.clusts.hysn
       }
 
-  
-  
+
     comp[comp$hhID %in% data[,    'hhID'] ,   'typology']  <- T
     data[ ,   'typology']  <- T
     
-    
-    
+
     for (i in seq(1:num.clusters))  {
       
       data[data$typ ==   i & !is.na(data$typ)  ,'typ.str']  <-  match(i,t.nm) 
       data[data$typ ==   i & !is.na(data$typ)  ,'typ']  <- i
       
-      
-        
+   
     comp[comp$hhID %in% data[data$typ == i,    'hhID'] ,   'typ.str']  <- match(i,t.nm) 
     comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ']  <- i
     
     cluster.name <- str_c('Cluster number ', i)
-    #system.name <- T
     
     comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ.str.fill']  <-  cluster.name
     comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'facet.lab']  <-  'All systems'
 
     }
     
-    if (T == 'Traditional') {
-      hc.amaz <-  data } else if (T == 'Hybrid shade') {
-      hc.hysh <-  data} else if (T == 'Hybrid sun') {
-        hc.hysun <- data }
+  #  if (T == 'Traditional') {
+     # hc.amaz <-  data } else if (T == 'Hybrid shade') {
+     # hc.hysh <-  data} else if (T == 'Hybrid sun') {
+       # hc.hysun <- data }
     
     
     
     
   }
 
- 
-
+  # Assign descriptive names for clusters to appear in results figures
+  ordered.typ.fill <- c(
+    'Fertiliser & High altitude',
+    'Fertiliser & Low altitude',
+    'Labour & Fertiliser',
+    'Weeding & Waterlogged',
+    'Low tree density',
+    'Cluster num 6',
+    'Nutrient deficient', # Hybrid shade 1
+    'High tree density',
+    'Open & Balanced fertilisation',
+    'Dense & Balanced fertilisation',
+    'N-fertilisation & Pollination',
+    'Cluster num 12',
+    'Nutrient deficient & High altitude', # Amazonia 1
+    'Nutrient deficient & Low altitude',
+    'N-Fertilisation',
+    'Fertiliser & Tall canopy',
+    'Cluster num 18'
+  )
+  
+  
+##  ~~~~ GENERATE RESULTS FIGURES/TABLES ~~~~ ##
+  
+# Define typology variable as an ordered factor
 ordered.typologies <<- c( 'Hybrid sun' , 'Hybrid shade' ,'Amazonia'  )
-comp$typology <- factor(comp$typology  , levels= ordered.typologies)
+comp$typology <- factor(comp$typology  , levels = ordered.typologies)
 
- 
 
+# Define type variable as an ordered factor
 ordered.typ <<- c(
  1,
  2,
@@ -849,39 +781,10 @@ ordered.typ <<- c(
  5,
  6
 )
-
-
 comp[,'typ.str'] <- factor(comp[,'typ.str'] , levels = ordered.typ)
 
 
-ordered.typ.fill <- c(
-  'Fertiliser & High altitude',
-  'Fertiliser & Low altitude',
-  'Labour & Fertiliser',
-  'Weeding & Waterlogged',
-  'Low tree density',
-  'Cluster num 6',
-  'Nutrient deficient', # Hybrid shade 1
-  'High tree density',
-  'Open & Balanced fertilisation',
-  'Dense & Balanced fertilisation',
-  'N-fertilisation & Pollination',
-  'Cluster num 12',
-  #'Cluster num 11',  # Amazonia 1
-  'Nutrient deficient & High altitude',
-  'Nutrient deficient & Low altitude',
-  'N-Fertilisation',
-  'Fertiliser & Tall canopy',
-  'Cluster num 18'
-)
-
-
-
-#comp[comp$typ.str == 4 & !is.na(comp$typ.str) , 'typ.str.fill']
-#comp[comp$typ.str == 5 & !is.na(comp$typ.str) , 'typ.str.fill']
-
-
-
+# Re-define type string variable as an ordered factor
 comp[comp$typ.str == 1 & !is.na(comp$typ.str) & comp$typology == 'Hybrid sun' & !is.na(comp$typology), 'typ.str.fill'] <- ordered.typ.fill[1]
 comp[comp$typ.str == 2 & !is.na(comp$typ.str) & comp$typology == 'Hybrid sun' & !is.na(comp$typology), 'typ.str.fill'] <- ordered.typ.fill[2]
 comp[comp$typ.str == 3 & !is.na(comp$typ.str) & comp$typology == 'Hybrid sun' & !is.na(comp$typology), 'typ.str.fill'] <- ordered.typ.fill[3]
@@ -904,19 +807,17 @@ comp[comp$typ.str == 5 & !is.na(comp$typ.str) & comp$typology == 'Amazonia' & !i
 comp[comp$typ.str == 6 & !is.na(comp$typ.str) & comp$typology == 'Amazonia' & !is.na(comp$typology), 'typ.str.fill'] <- ordered.typ.fill[18]
 
 
-#comp$typ.str.fill  <- droplevels(comp$typ.str.fill )
-#comp[,'typ.str.fill'] <- factor(comp[,'typ.str.fill'] , levels = ordered.typ.fill)
-comp$typ.str.fill.unordered <- comp$typ.str.fill 
+# Define type string variable as an ordered factor
 comp$typ.str.fill <- factor(comp$typ.str.fill , levels = ordered.typ.fill , ordered =  TRUE)
 
-#comp$typ.str.fill <- 0
 
-#cc.typ <- comp[!is.na(comp$typology),]
-#cc.typ <- cc.typ[,c('yld.pc.attainable.adj','typ' ,'typology')]
+#' Figures are generated respectively for within (intra) group comparisons
+#' (for each cluster in each production system) and then for cross (inter) group
+#'  comparisons (comparing production systems). These figures are then merged into 
+#'  panelled figures for each indicator (GHG, VOP, and yield)
 
 
-# Data prep for figures
-
+# Data prep for intra group figures
 fig.intrag.dt.prep <- function(){
   
   #Absolute GHG data
@@ -947,7 +848,7 @@ fig.intrag.dt.prep <- function(){
   
   ghg.ab.dat <- data.frame(  matrix(ncol = length(ghg.ab.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , ghg.ab.dat.var.names )))
   
-  #VOP prep
+  # VOP prep
   # Value of production
   vop.dat.var.names <- c ('Typology',
                           'Type',
@@ -969,13 +870,9 @@ fig.intrag.dt.prep <- function(){
                 'All cost categories'
                 )
   
-
-  
-  
   rows <- seq(1:( tot.clusters*length(rev.catg )))
   
   vop.dat <- data.frame(  matrix(ncol = length(vop.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , vop.dat.var.names )))
-  
   
   vop.var.names <- c('lc.net.VOP.1000.usd.per.ha.frac.rev.basis.cc',
                      'lc.net.VOP.1000.usd.per.ha.frac.rev.basis.fuelw',
@@ -986,12 +883,10 @@ fig.intrag.dt.prep <- function(){
                      'total.costs.usd.per.ha'
   )
   
-  
 
   ghg.row.count <- 1
   vop.row.count <- 1
-  
-  
+
   for (t1 in  typologies) {
     
     if (t1 == "Hybrid sun") {  clust.quant <- num.clusts.hysn}
@@ -1028,6 +923,8 @@ fig.intrag.dt.prep <- function(){
         
         ghg.ab.dat[ghg.row.count, 'value.sd' ] <-  sd( comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var] , na.rm = TRUE)
         
+        
+        
         #  Aggregated values
         #ghg.ab.dat[ghg.ab.dat$Typology == t1 & ghg.ab.dat$Type == t2 & !is.na(ghg.ab.dat$Type) & !is.na(ghg.ab.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
         
@@ -1056,9 +953,6 @@ fig.intrag.dt.prep <- function(){
         if (cat == rev.catg[5]) {var <- vop.var.names[5] }
         if (cat == rev.catg[6]) {var <- vop.var.names[6] }
         if (cat == rev.catg[7]) {var <- vop.var.names[7] }
-        
-        # vr <- var.names[]
-        #   print(paste(var))
         
         vop.dat[vop.row.count, 'Revenue.category'] <-  cat
         
@@ -1124,19 +1018,11 @@ fig.intrag.dt.prep <- function(){
     }
   }
   
-  # View(ghg.ab.dat)
-  #(-0.856791474
-  #-1.384693266
-  #-0.436240308
-  #-0.366667725)
-  
   #  ghg.ab.dat <<- ghg.ab.dat
   # vop.dat <<- vop.dat
   
-  
-  
-  
-  
+  vop.dat[ is.na(vop.dat$value.sd), 'tot.value.sd' ] <- mean(na.omit(vop.dat[,'tot.value.sd']))
+
   
   # Factor specification
   #   Absolute GHG
@@ -1173,7 +1059,7 @@ fig.intrag.dt.prep <- function(){
   vop.dat$Revenue.category <- factor( vop.dat$Revenue.category   , ordered.revenue.categories)
   
   
-  vop.dat[,'Type.str'] <- factor(  vop.dat[,'Type.str'], levels = ordered.typ)
+  vop.dat[,'Type.str'] <- factor(  vop.dat[,'Type.str'] , levels = ordered.typ)
   
   vop.dat <<-  vop.dat
   
@@ -1183,7 +1069,8 @@ fig.intrag.dt.prep <- function(){
 }  
 fig.intrag.dt.prep()
 
-fig.settings <- function(){
+# Figure parameters 
+fig.params.intrag <- function(){
 
   bar.chart.border.color <<- 'black'
   bar.chart.border.thickness <<- 0#0.035
@@ -1297,7 +1184,7 @@ fig.settings <- function(){
 
  
 }
-fig.settings()
+fig.params.intrag()
 
 intrag.figs <- function(){   
   
@@ -1469,14 +1356,14 @@ fig.bar.intrag.vop  <<- annotate_figure( fig.bar.intrag.vop.b ,   fig.lab = "b",
 }
 intrag.figs()
 
+
+
 fig.bar.intrag.vop
-
 fig.barintrag.ghgr.t 
-
-
 fig.intrag.yg
 fig.intrag.yd.act
 
+# Data prep for inter group figures
 fig.interg.dt.prep <- function(){
 
   
@@ -1673,8 +1560,8 @@ fig.interg.dt.prep <- function(){
 }  
 fig.interg.dt.prep()
 
-interg.figs <- function(){
-  
+# Parameters for intergroup figures
+fig.params.interg <- function(){
   # GGPLOT settings
   # Legend row spacing
   fig.bar.inter.ghg.legend.row.spacing.cm <<- 0.25
@@ -1732,7 +1619,11 @@ interg.figs <- function(){
   
   fig.vop.leg.x.coord <<- 0.58
   fig.vop.leg.y.coord <<- 0.7
+}
+fig.params.interg()
 
+interg.figs <- function(){
+  
   fig.bar.intergr.ghgr.t.b <- ggplot( data = inter.ghg.ab.dat[,]  )  +
     geom_bar(aes(y = value.mn  , x = Typology, fill = Emission.category) , position="stack", stat="identity" , width = fig.interg.ghg.bar.width , colour = NA , size=bar.chart.border.thickness ) +
     geom_point(aes(y = tot.value.mn    , x = Typology),stat = "identity",  shape = point.type, size= point.size , color = point.color.border , fill=point.color.fill  , stroke =  point.border.thickness)  +
@@ -1761,7 +1652,6 @@ interg.figs <- function(){
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1))
-  
 
   
   fig.bar.interg.vop.b <- ggplot( data = interg.vop.dat[]  )  +
@@ -1852,7 +1742,7 @@ interg.figs <- function(){
       panel.border = element_rect(colour = "black", fill=NA, size=1)
     )  
   
-
+  # Merge inter and intra group figures into panelled figures
   fig.interg.yg <<- annotate_figure( fig.interg.yg.b,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = label.fs )   
   fig.interg.yd.act <<-  annotate_figure( fig.interg.yd.act.b,   fig.lab = "c", fig.lab.pos ="top.left", fig.lab.size = label.fs )  
   
@@ -3043,9 +2933,6 @@ setwd(main.dir)
 
 }  # END TYPOLOGY CODE
 run.typology()
-
-#50 , 30 ,26
-
 
 
 # Type comparisons
