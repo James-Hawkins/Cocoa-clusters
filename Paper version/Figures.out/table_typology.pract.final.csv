@@ -1,0 +1,17 @@
+﻿Cluster,n,N-fert (kg/ha/yr),Non N-fert (kg/ha/yr),Pruning (#/yr),Weeding (#/yr),Pollination (dummy),Insecticide (dummy),Fungicides (dummy),Herbicides (dummy),Blackpod detection rate (%),Capsid detection rate (%),Stemborer detection rate (%)
+Fertiliser_&_High_alt,6,40 ± 90,103 ± 164,1.2 ± 0.4,2.5 ± 1.1,0,83,100,0,100,0,86
+Fertiliser_&_Low_alt,7,53 ± 140,53 ± 140,1.4 ± 0.5,2.9 ± 1,0,100,100,0,29,86,58
+Labour_intense_&_Fert,31,122 ± 259,149 ± 556,1.6 ± 0.9,3 ± 1,3,100,100,3,100,58,75
+Weeding_&_Waterlogged,4,17 ± 33,93 ± 185,1.5 ± 1.4,3.5 ± 0,0,100,100,0,100,75,100
+Low density,2,19 ± 26,0 ± 0,1.5 ± 0.7,2.5 ± 1.4,50,100,100,0,0,100,86
+,,,,,,,,,,,,
+Nutrient deficit,10,25 ± 78,0 ± 0,1.3 ± 0.5,2.9 ± 1,0,100,100,0,100,60,0
+High density,6,309 ± 594,62 ± 151,1.2 ± 0.4,2.8 ± 1,17,100,100,0,100,0,75
+Open_&_Balanced_fert,4,93 ± 185,93 ± 185,1 ± 0,3 ± 1,0,100,100,0,50,75,88
+Dense_&_Balanced_fert,8,99 ± 168,93 ± 172,1.7 ± 0.9,3 ± 0.9,12,88,100,0,100,88,50
+N-fert_&_Pollinate,2,618 ± 175,0 ± 0,1 ± 0,2.5 ± 1.4,100,100,100,0,100,50,0
+,,,,,,,,,,,,
+Nutrient_deficit_&_High,3,2 ± 4,0 ± 0,1.7 ± 0.6,2.8 ± 1.2,0,67,100,0,67,33,67
+Nutrient_deficit_&_Low,6,0 ± 0,62 ± 151,1.3 ± 0.5,2.5 ± 1.1,0,100,100,0,17,67,60
+N_fertiliser,5,371 ± 262,119 ± 265,1.7 ± 1.1,2.9 ± 1.3,0,100,100,0,100,60,67
+Fertiliser_Tall_canopy,12,83 ± 150,93 ± 168,1.5 ± 0.8,2.7 ± 1.3,0,100,100,17,100,67,67
