@@ -592,11 +592,7 @@ gen.clusters <- function(){
    
   }
 
-  
-if (clusters.redefine == 1){
-
-  
-}
+} # END CLUSTERS CODE
 
 gen.clusters()
 
@@ -1015,7 +1011,7 @@ fig.params.intrag <- function(){
  x.tick.angle <<- 270.0  
  
  facet.tx.size <<- 11.5
- facet.tx.size.yd <<- facet.tx.size
+ facet.tx.size.yd <<- 10.5
  
  label.fs <<- 11.5
  
@@ -1023,6 +1019,11 @@ fig.params.intrag <- function(){
  p.mg.right <<- 0.2
  p.mg.top <<- 0.2
  p.mg.bottom <<- -0.35
+ 
+ p.yd.mg.top <<- 0.2
+ p.yd.mg.right <<- 0.2
+ p.yd.mg.bottom <<- 0.125
+ p.yd.mg.left <<- 0.3
  
  box.error.bar.width <<- 0.215
  
@@ -1072,12 +1073,13 @@ fig.params.intrag <- function(){
  labels_rev_srcs <<-  ordered.revenue.categories
  
  
- colors_rev_srcs <<-  c('#cd754c' , 
+ colors_rev_srcs <<-  c( '#D77345' ,# '#cd754c' , 
                         '#9acd32', 
-                                           '#fdee00',
-                                           '#ff8c00',
-                                           '#c19a6b' , 
-                                           '#9E8363' ,
+                                           '#ffef00',
+                                           '#FF981B',
+                                        '#bfa584'  , #'#c19a6b' , 
+                        '#9E8363', #,
+                       # '#d2c6b7' 
                         '#989898' 
 )
  
@@ -1195,7 +1197,7 @@ fig.intrag.yd.act.b <- ggplot( data = comp[!is.na(comp$typology)   &  !is.na(com
   facet_grid( cols = vars(typology) , scales = "free_x", space = "free_x")   +
   scale_y_continuous(breaks = seq(0, 3, by = .5), labels = scales::number_format(accuracy = 0.1))+
   theme(
-    plot.margin = unit(c(p.mg.top,p.mg.right,p.mg.bottom,p.mg.left*.9), "cm"),
+    plot.margin = unit(c(p.yd.mg.top , p.yd.mg.right , p.yd.mg.bottom , p.yd.mg.left*.9), "cm"),
     axis.ticks.x = element_blank(),
     axis.ticks.y = element_blank(),
     axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.0, size = x.tick.fs),
@@ -1436,17 +1438,17 @@ fig.params.interg <- function(){
   
   p.mg.interg.ghg.bottom <<- 3
   p.mg.interg.vop.bottom <<- 2.85
-  p.mg.interg.yd.bottom <<- 1.25
+  #p.mg.interg.yd.bottom <<- 1.25
 
   p.interg.yd.mg.top <<- 0.2
   p.interg.yd.mg.right <<- 0.2
-  p.interg.yd.mg.bottom  <<- 2.4
-  p.interg.yd.mg.left <<- -0.05
+  p.interg.yd.mg.bottom  <<- 2.885
+  p.interg.yd.mg.left <<- 0.05
   
   p.interg.yg.mg.top <<- 0.2
   p.interg.yg.mg.right <<- 0.2
   p.interg.yg.mg.bottom <<- -0.25
-  p.interg.yg.mg.left <<- 0.2
+  p.interg.yg.mg.left <<- 0.32
   
   interg.leg.key.h.ghg <<- 0.37
   interg.leg.key.w.ghg <<- 0.37
@@ -1466,7 +1468,7 @@ fig.params.interg <- function(){
   interg.fig.vop.leg.text.fs <<- 10.0
   
   fig.interg.yg.y.tick.fs <<- 7
-  fig.interg.yg.y.tit.fs <<- 12.5
+  fig.interg.yg.y.tit.fs <<- 10.0
   fig.interg.yg.x.tick.fs <<-  fig.interg.ghg.x.tick.fs 
   
   fig.interg.ghg.bar.width <<- 0.65
@@ -1481,6 +1483,9 @@ fig.params.interg <- function(){
   fig.vop.leg.y.coord <<- 0.7
   
   point.size.interg <<- 1.05 * point.size.intrag
+  
+  facet.tx.size.interg.yg <<- 10.5
+  facet.tx.size.interg.yd <<- 10.5
   
 }
 fig.params.interg()
@@ -1572,7 +1577,7 @@ interg.figs <- function(){
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
       axis.title.y = element_text(size =   fig.interg.yg.y.tit.fs ), 
-      strip.text.x = element_text(size =  facet.tx.size.yd, color = 'black'),
+      strip.text.x = element_text(size =    facet.tx.size.interg.yg, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1)
     )
@@ -1595,7 +1600,7 @@ interg.figs <- function(){
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
       axis.title.y = element_text(size =    fig.interg.yg.y.tit.fs ),
-      strip.text.x = element_text(size =  facet.tx.size.yd , color = 'black'),
+      strip.text.x = element_text(size =    facet.tx.size.interg.yd , color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1)
     )  
@@ -1633,6 +1638,9 @@ interg.figs <- function(){
                                 rel_widths = c(24/100, 76/100))
   
   ggsave("fig.yd.pdf",   fig.yd    , path = "Figures.out", width=1000, height=700, units="px", scale=2.5)
+  
+  ggsave("fig.yd.jpeg",   fig.yd    , path = "Figures.out", width=1000, height=700, units="px", scale=2.5)
+  
   
   ggsave("fig.vop.pdf",  fig.vop   , path = "Figures.out", width=1250, height=600, units="px", scale=2.5)
   
@@ -2599,7 +2607,7 @@ write.csv(Typ.data  , Typology.data.file.name )
 comp <<- comp
 setwd(main.dir) 
 
-} # END TYPOLOGY CODE
+} # END FIGURES CODE
   
 gen.figures()
   
