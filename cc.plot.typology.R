@@ -594,7 +594,17 @@ gen.clusters <- function(){
 
   
 if (clusters.redefine == 1){
-# Create new variables in comp dataframe related to cluster results
+
+  
+}
+
+gen.clusters()
+
+gen.figures <- function(){
+  
+  setwd(cc.typ.dir)
+  
+  # Create new variables in comp dataframe related to cluster results
   
   
   comp[ ,'typ.str']  <- NA
@@ -610,69 +620,62 @@ if (clusters.redefine == 1){
       t.nm <-  t.nm.amz
       num.clusters <- num.clusts.amz
       data <- hc.amaz} else if (T == 'Hybrid shade') {
-      t.nm <-  t.nm.hy.sh
-      num.clusters <- num.clusts.hysh
-      data <- hc.hysh} else if (T == 'Hybrid sun') {
-      t.nm <-  t.nm.hy.sun
-      data <- hc.hysun
-      num.clusters <- num.clusts.hysn
-      }
-
-
+        t.nm <-  t.nm.hy.sh
+        num.clusters <- num.clusts.hysh
+        data <- hc.hysh} else if (T == 'Hybrid sun') {
+          t.nm <-  t.nm.hy.sun
+          data <- hc.hysun
+          num.clusters <- num.clusts.hysn
+        }
+    
+    
     comp[comp$hhID %in% data[,    'hhID'] ,   'typology']  <- T
     data[ ,   'typology']  <- T
     
-
+    
     for (i in seq(1:num.clusters))  {
       
       data[data$typ ==   i & !is.na(data$typ)  ,'typ.str']  <-  match(i,t.nm) 
       data[data$typ ==   i & !is.na(data$typ)  ,'typ']  <- i
       
-   
-    comp[comp$hhID %in% data[data$typ == i,    'hhID'] ,   'typ.str']  <- match(i,t.nm) 
-    comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ']  <- i
-    
-    cluster.name <- str_c('Cluster number ', i)
-    
-    comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ.str.fill']  <-  cluster.name
-    comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'facet.lab']  <-  'All systems'
-
+      
+      comp[comp$hhID %in% data[data$typ == i,    'hhID'] ,   'typ.str']  <- match(i,t.nm) 
+      comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ']  <- i
+      
+      cluster.name <- str_c('Cluster number ', i)
+      
+      comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'typ.str.fill']  <-  cluster.name
+      comp[comp$hhID %in% data[data$typ == i,    'hhID']  ,'facet.lab']  <-  'All systems'
+      
     }
     
-  
+    
   }
-}
-  
-  # Assign descriptive names for clusters to appear in results figures
-  ordered.cluster.names <- c(
-    'Fertiliser & High altitude',
-    'Fertiliser & Low altitude',
-    'Labour & Fertiliser',
-    'Weeding & Waterlogged',
-    'Low tree density',
-    'Cluster num 6',
-    'Nutrient deficient', # Hybrid shade #1
-    'High tree density',
-    'Open & Balanced fertilisation',
-    'Dense & Balanced fertilisation',
-    'N-fertilisation & Pollination',
-    'Cluster num 12',
-    'Nutrient deficient & High altitude', # Amazonia #1
-    'Nutrient deficient & Low altitude',
-    'N-fertilisation',
-    'Fertiliser & Tall canopy',
-    'Cluster num 17',
-    'Cluster num 18'
-  )
-  
-  
-}
 
-gen.clusters()
 
-gen.figures <- function(){
+# Assign descriptive names for clusters to appear in results figures
+ordered.cluster.names <- c(
+  'Fertiliser & High altitude',
+  'Fertiliser & Low altitude',
+  'Labour & Fertiliser',
+  'Weeding & Waterlogged',
+  'Low tree density',
+  'Cluster num 6',
+  'Nutrient deficient', # Hybrid shade #1
+  'High tree density',
+  'Open & Balanced fertilisation',
+  'Dense & Balanced fertilisation',
+  'N-fertilisation & Pollination',
+  'Cluster num 12',
+  'Nutrient deficient & High altitude', # Amazonia #1
+  'Nutrient deficient & Low altitude',
+  'N-fertilisation',
+  'Fertiliser & Tall canopy',
+  'Cluster num 17',
+  'Cluster num 18'
+)
+
   
-  setwd(cc.typ.dir)
   
 ##  ~~~~ GENERATE RESULTS FIGURES/TABLES ~~~~ ##
   
