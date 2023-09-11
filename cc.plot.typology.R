@@ -184,24 +184,7 @@ gen.clusters <- function(){
  
   T.df <- T.df.raw
 
-  # Typology sample selection
-  T.df <- T.df[ !is.na(T.df$tree.count.per.ha) & T.df$tree.count.per.ha > 600 & T.df$tree.count.per.ha < 1600,]
-  
-  T.df <- T.df[ !( !is.na(T.df$gross.revenue.frt.usd.per.ha) & T.df$gross.revenue.frt.usd.per.ha > 800  & T.df$cc.catg.str != 'Hybrid shade')  ,]
-  T.df <- T.df[ !( !is.na(T.df$gross.revenue.ann.crop.usd.per.ha) & T.df$gross.revenue.ann.crop.usd.per.ha > 800 & T.df$cc.catg.str != 'Hybrid shade')   ,]
-  
-  T.df <- T.df[ ( !is.na(T.df$gross.revenue.frt.usd.per.ha) & T.df$gross.revenue.frt.usd.per.ha < 500  )  ,]
-  T.df <- T.df[ ( !is.na(T.df$gross.revenue.ann.crop.usd.per.ha) & T.df$gross.revenue.ann.crop.usd.per.ha < 295 )   ,]
-  
-  T.df <- T.df[ !( !is.na(T.df$gross.revenue.usd.per.ha.frac.frt) & T.df$gross.revenue.usd.per.ha.frac.frt > .340 & T.df$cc.catg.str == 'Hybrid sun')  ,]
-
-  T.df <- T.df[ !is.na(T.df$total.cocoa.costs.usd.per.ha) & T.df$total.cocoa.costs.usd.per.ha < 450 ,]
-  
-  T.df <- T.df[ !is.na(T.df$yld_pc_attain_plot) & T.df$yld_pc_attain_plot <= 100.000 ,]
-  
-  T.df <- T.df[ !is.na(T.df$shade.tree.to.cm.tree.ratio) & !(T.df$shade.tree.to.cm.tree.ratio < 0) & !(T.df$shade.tree.to.cm.tree.ratio*100 > 100 ) ,]
-  
-  
+ 
   amaz.ids <- T.df[ T.df$cc.catg.str == 'Amazonia'
                       &  !is.na(T.df$cc.catg.str)
                    ,'hhID']
@@ -584,7 +567,7 @@ gen.clusters <- function(){
 
 } # END CLUSTERS CODE
 
-#gen.clusters()
+gen.clusters()
 
 gen.figures <- function(){
   
@@ -2613,13 +2596,13 @@ fig.intrag.yg
 fig.intrag.yd.act
 
 
-fig.barintrag.ghgr.t   # 810, 320
+fig.barintrag.ghgr.t   
 fig.bar.intrag.vop
 
 fig.yd 
 
-fig.ghg  # ideal dimensions 950, 400
-fig.vop # ideal dimensions 860, 390
+fig.ghg  
+fig.vop 
 
 
 # System comparisons
