@@ -205,7 +205,7 @@ gen.clusters <- function(){
     n.hysn <-nrow(hysun.plots)
     n.amz <-nrow(amaz.plots)
     
-    n.total <- n.hysn + n.hysh+ n.amz
+    n.total <- n.hysn + n.hysh + n.amz
 
     print(paste('Total number of observations included: ', n.total  ))
     print(paste('For hybrid sun: ',  n.hysn   ))
@@ -567,7 +567,18 @@ gen.clusters <- function(){
 
 } # END CLUSTERS CODE
 
-gen.clusters()
+# gen.clusters()
+
+
+
+
+summary(T.df$temp)
+summary(T.df$temp.mmm)
+summary(T.df$precip)
+summary(T.df$elev)
+
+
+
 
 gen.figures <- function(){
   
@@ -623,9 +634,9 @@ gen.figures <- function(){
 
 
 # Assign descriptive names for clusters to appear in results figures
-ordered.cluster.names <- c(
-  'Fertiliser & High altitude',
-  'Fertiliser & Low altitude',
+ordered.cluster.names <<- c(
+  'Fertiliser & High elevation',
+  'Fertiliser & Low elevation',
   'Labour & Fertiliser',
   'Weeding & Waterlogged',
   'Low tree density',
@@ -636,8 +647,8 @@ ordered.cluster.names <- c(
   'Dense & Complex fertilisation',
   'N-fertilisation & Pollination',
   'Cluster num 12',
-  'Nutrient deficient & High altitude', # Amazonia #1
-  'Nutrient deficient & Low altitude',
+  'Nutrient deficient & High elevation', # Amazonia #1
+  'Nutrient deficient & Low elevation',
   'N-fertilisation',
   'Fertiliser & Tall canopy',
   'Cluster num 17',
@@ -714,12 +725,14 @@ fig.intrag.dt.prep <- function(){
 
   
   emis.catg <- c(
-    'N2O syn',
+     'N2O syn',
     'N2O organic',
     'CO2 seqn. shade',
     'CO2 seqn. cocoa',
     'CO2 seqn. fruit',
-    'CO2 seqn. other'
+    'CO2 seqn. other',
+    'CO2 seqn. soil',
+    'CH4 cocoa'
   )
   
   
@@ -779,12 +792,15 @@ fig.intrag.dt.prep <- function(){
       # GHG emissions
       for (cat in emis.catg){
         
+     
         if (cat == emis.catg[1] ) {var <- 'lc.N2O.synthetic.total.Mg.CO2eq' }
         if (cat == emis.catg[2] ) {var <- 'lc.N2O.organic.total.Mg.CO2eq' }
         if (cat == emis.catg[3] ) {var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr'  }
         if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr' }
         if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' }
         if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr' }
+        if (cat == emis.catg[7] ) {var <- 'lc.SOIL.CO2.Mg.CO2eq'   }
+        if (cat == emis.catg[8] ) {var <- 'lc.CH4.Mg.pods.Mg.CO2eq'}
         
 
         # Name emission category (used for group in ggplot)
@@ -807,10 +823,11 @@ fig.intrag.dt.prep <- function(){
        # ghg.dat[ghg.dat$Typology == t1 & ghg.dat$Type == t2 & !is.na(ghg.dat$Type) & !is.na(ghg.dat$Typology ), 'tot.value.mn' ] %+=%  (val)
         
           
-      # ghg.dat[ghg.row.count, 'tot.value.mn' ] <- mean(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ], na.rm = TRUE)
+       ghg.dat[ghg.row.count, 'tot.value.mn' ] <- mean(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr' ], na.rm = TRUE)
 
       ghg.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.95pci' ]))
-
+      #ghg.dat[ghg.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
+      
         ghg.row.count %+=% 1
         
       }
@@ -844,7 +861,7 @@ fig.intrag.dt.prep <- function(){
              (cat == rev.catg[4])  |
              (cat == rev.catg[5])  |
              (cat == rev.catg[6]) ) {
-        vop.dat[vop.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+       vop.dat[vop.row.count, 'value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
         }else {
           
           vop.dat[vop.row.count, 'value.mn' ] <- (-1/1000)*mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
@@ -852,13 +869,14 @@ fig.intrag.dt.prep <- function(){
         }
         
         
-        vop.dat[vop.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
+      #  vop.dat[vop.row.count, 'value.sd' ] <-  sd(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , var]))
         
         # Aggregated values
         vop.dat[vop.row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha']))
 
-        vop.dat[vop.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.95pci']))
-
+       vop.dat[vop.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.95pci']))
+       #vop.dat[vop.row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$typology ==  t1 & comp$typ == t2  & !is.na(comp$typology) & !is.na(comp$typ) , 'lc.net.VOP.1000.usd.per.ha.sd']))
+       
         vop.row.count %+=% 1
         
       }
@@ -904,12 +922,15 @@ fig.intrag.dt.prep <- function(){
   
   ghg.dat$Typology <- factor( ghg.dat$Typology   , levels= ordered.typologies)
   
-  ordered.emission.categories <<- c(  'CO2 seqn. other',
+  ordered.emission.categories <<- c(         'CO2 seqn. soil',
+                                             'CO2 seqn. other',
                                          'CO2 seqn. fruit',
                                          'CO2 seqn. cocoa',
                                          'CO2 seqn. shade',
+                                         'CH4 cocoa',
                                          'N2O organic',
-                                         'N2O syn' )
+                                         'N2O syn'
+                                      )
   
 
   
@@ -948,14 +969,7 @@ fig.params.intrag <- function(){
 
   bar.chart.border.color <<- 'black'
   bar.chart.border.thickness <<- 0#0.035
- 
-  fig.ghg.leg.x.coord  <<- 0.19 
-  fig.ghg.leg.y.coord <<-  0.309925
   
-  fig.vop.leg.x.coord <<- 0.88
-  fig.vop.leg.y.coord <<- 0.7
-  
-
  bar.width <<- 0.68
  bar.color <<- '#9aabbc'
  bar.color.border <<- 'black'
@@ -981,7 +995,7 @@ fig.params.intrag <- function(){
  y.tit.sz <<- 10.5
  y.tit.sz.yd <<- 11.5
  
- x.tick.angle <<- 270.0  
+ x.tick.angle <<- 90
  
  facet.tx.size <<- 11.5
  facet.tx.size.yd <<- 10.5
@@ -993,6 +1007,16 @@ fig.params.intrag <- function(){
  p.mg.top <<- 0.2
  p.mg.bottom <<- -0.35
  
+ p.vop.intrag.mg.left <<- 0.3
+ p.vop.intrag.mg.right <<- 0.2
+ p.vop.intrag.mg.top <<- 0.2
+ p.vop.intrag.mg.bottom <<- -0.21
+ 
+ p.ghg.intrag.mg.left <<- 0.3
+ p.ghg.intrag.mg.right <<- 0.2
+ p.ghg.intrag.mg.top <<- 0.2
+ p.ghg.intrag.mg.bottom <<- -.215
+ 
  p.yd.mg.top <<- 0.2
  p.yd.mg.right <<- 0.2
  p.yd.mg.bottom <<- 0.125
@@ -1000,19 +1024,19 @@ fig.params.intrag <- function(){
  
  box.error.bar.width <<- 0.215
  
- fig.ghg.y.lim.max <<- 1.5
- fig.ghg.y.lim.min <<- - 8.5
+ fig.ghg.y.lim.max <<- 2.25
+ fig.ghg.y.lim.min <<- - 10.5
  
- y.max.vop <<- 2.0
+ y.max.vop <<- 1.85
  y.min.vop <<- -0.25
    
- intrag.leg.key.h.ghg <<- 0.35
- intrag.leg.key.w.ghg <<- 0.35
+ intrag.leg.key.h.ghg <<- 0.285
+ intrag.leg.key.w.ghg <<- 0.6
  
- intrag.leg.key.h.vop <<- 0.3
- intrag.leg.key.w.vop <<- 0.3
+ intrag.leg.key.h.vop <<- 0.285
+ intrag.leg.key.w.vop <<- 0.6
    
- intrag.leg.space.x.ghg <<- 0.3
+ intrag.leg.space.x.ghg <<- 0.2
  intrag.leg.space.y.ghg <<- 0.10
  
  intrag.leg.space.x.vop <<-  intrag.leg.space.x.ghg 
@@ -1021,6 +1045,10 @@ fig.params.intrag <- function(){
  intrag.fig.ghg.leg.text.fs <<- 8.5
  intrag.fig.vop.leg.text.fs <<- 8.5
    
+ yd.mean.point.size <<- 1.2
+ yd.mean.point.color <<- '#566573'
+ yd.mean.point.shape <<- 24
+ 
  # Variable ranges
  #min.x.intrag.ghgr.int <<- 1.15 * min(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated) - na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated))
  #max.x.intrag.ghgr.int <<- 1.15 * (max(na.omit(comp$typ.mn.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)) + max(na.omit(comp$typ.sd.lc.GHG.remv.cc.kg.CO2eq.kg.econ.allocated)))
@@ -1028,34 +1056,37 @@ fig.params.intrag <- function(){
  
  
  # GHG Figures
- labels_emis_srcs <<- c( bquote('Annual crop '*CO[2]*''),
+ labels_emis_srcs <<- c(   bquote('Soil '*CO[2]*''),
+                           bquote('Annual crop '*CO[2]*''),
                           bquote('Fruit tree '*CO[2]*''),
                          bquote('Cocoa tree '*CO[2]*''),
                           bquote('Shade tree '*CO[2]*''),
+                         bquote('Cocoa residues '*CH[4]*''),
                       bquote('Organic N  '*N[2]*'O'),
-                      bquote('Fertiliser N '*N[2]*'O'))
+                      bquote('Fertiliser N '*N[2]*'O')
+                      
+                      )
  
  
- colors_emis_srcs <<- c(  '#D5F5E3',
+ colors_emis_srcs <<- c(  '#cfcfc4' , #'#dcdcdc' , # '#99A6B2',
+                        '#D5F5E3',
    '#82E0AA',
                           '#28B463',
-                          '#186A3B',
-                         '#CA6F1E' , # organic
-                         '#F5B041'  # synth 
+                          '#279757',
+ '#6495ed' ,  #'#87b5eb' , 
+   '#E5981B',
+                         '#F5B857'  
  )
 
  # VOP figure
- 
  labels_rev_srcs <<-  ordered.revenue.categories
  
- 
- colors_rev_srcs <<-  c( '#D77345' ,# '#cd754c' , 
+ colors_rev_srcs <<-  c( '#D77345' ,
                         '#9acd32', 
                                            '#ffef00',
                                            '#FF981B',
-                                        '#bfa584'  , #'#c19a6b' , 
-                        '#9E8363', #,
-                       # '#d2c6b7' 
+                                        '#bfa584'  ,  
+                        '#9E8363', 
                         '#989898' 
 )
  
@@ -1075,30 +1106,20 @@ intrag.figs <- function(){
     xlab('')  +
     ylab(bquote('Net GHG emissions (Mg  '*CO[2]*'eq '*ha^-1*' '*yr^-1*')'))  +
     facet_grid( cols = vars(Typology) , scales = "free_x", space = "free_x")   +
-    scale_y_continuous(
-      breaks = seq(-10.0, 0.0, by = 2))+ 
     coord_cartesian( ylim = c(fig.ghg.y.lim.min, fig.ghg.y.lim.max)) +
     guides(fill = guide_legend(byrow = TRUE))+
     theme(
       # Margin
-      plot.margin = unit(c(p.mg.top , p.mg.right, p.mg.bottom ,p.mg.left), "cm"),
+      plot.margin = unit(c(p.ghg.intrag.mg.top , p.ghg.intrag.mg.right, p.ghg.intrag.mg.bottom ,p.ghg.intrag.mg.left), "cm"),
       axis.ticks.x = element_blank(),
       axis.ticks.y = element_blank(),
-      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.0, size = x.tick.fs),
+      axis.text.x = element_text(angle = x.tick.angle, face = 'italic' , vjust = 0.5, hjust=1, size = x.tick.fs),
       axis.text.y = element_blank(), 
-    legend.background = element_rect(fill = 'white', size = 0.35, linetype = "solid",  colour = NA),
        # Legend
-      legend.key.height = unit(intrag.leg.key.h.ghg, 'cm'),
-      legend.key.width = unit(intrag.leg.key.w.ghg, 'cm'),
-      legend.spacing.y = unit(intrag.leg.space.y.ghg, 'cm'),
-      legend.spacing.x = unit(intrag.leg.space.x.ghg  , 'cm'),
-      legend.position = c(fig.ghg.leg.x.coord , fig.ghg.leg.y.coord),
-      legend.margin = margin(1.1 , 1.1 , 1.1 , 1.1) ,
- legend.title = element_blank(),
+      legend.position = "none",
      axis.title.y = element_blank(),
-      legend.text = element_text(size = intrag.fig.ghg.leg.text.fs),
-     strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
-      strip.background = element_rect(color = 'black' , fill='white' , size=1.0 , linetype="solid"),
+     strip.text.x = element_text(size =  facet.tx.size, face = 'italic' , color = 'black'),
+      strip.background = element_rect(color = 'black' , fill='white' ,  size=1.0 , linetype="solid"),
       # Panel
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
@@ -1120,35 +1141,30 @@ intrag.figs <- function(){
     coord_cartesian( ylim = c(y.min.vop, y.max.vop)) +
    guides(fill = guide_legend(byrow = TRUE))+
     theme(
-      plot.margin = unit(c(p.mg.top,p.mg.right, p.mg.bottom ,p.mg.left), "cm"),
+      plot.margin = unit(c(p.vop.intrag.mg.top , p.vop.intrag.mg.right, p.vop.intrag.mg.bottom , p.vop.intrag.mg.left), "cm"),
      # axis.ticks.x = element_blank(),
-  legend.background = element_rect(fill = 'white', size = 0.35, linetype = "solid",  colour = NA),
+  #legend.background = element_rect(fill = 'white', size = 0.35, linetype = "solid",  colour = NA),
       axis.ticks.y = element_blank(),
   axis.ticks.x = element_blank(),
-      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.0, size = x.tick.fs),
+      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, face = 'italic' , hjust=1, size = x.tick.fs),
       axis.text.y = element_blank(),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
       # Legend
-      legend.text = element_text(size = intrag.fig.vop.leg.text.fs),
-      legend.key.height = unit(intrag.leg.key.h.vop, 'cm'),
-      legend.key.width = unit(intrag.leg.key.w.vop, 'cm'),
-      legend.spacing.x = unit(intrag.leg.space.x.vop, 'cm'),
-      legend.spacing.y = unit(intrag.leg.space.y.vop, 'cm'),
-      legend.margin = margin(1.1,1.1,1.1,1.1),
-      legend.key.size = unit(.42, 'cm'),
-      legend.title =  element_blank(),
-      legend.position = c(fig.vop.leg.x.coord , fig.vop.leg.y.coord),
+  legend.position = "none",
        axis.title.y = element_blank(), 
-      strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
+      strip.text.x = element_text(size =  facet.tx.size, color = 'black' , face = 'italic' ),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1))  #810,320
+  
   
 
   fig.intrag.yg.b <- ggplot( data= comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)     ,]  ) +
  stat_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str.fill, group = typ.str.fill ), outlier.shape = NA ,  coef = 10 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten)+
-    stat_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str.fill, group = typ.str.fill ), geom = 'errorbar' , coef = 10 , color = box.plot.color,  alpha= 5 , lwd= fig.yd.bp.thickness , width = box.error.bar.width)+
+   stat_boxplot(aes(y = yld_pc_attain_plot  , x = typ.str.fill, group = typ.str.fill ), geom = 'errorbar' , coef = 10 , color = box.plot.color,  alpha= 5 , lwd= fig.yd.bp.thickness , width = box.error.bar.width)+
+    #   stat_summary( aes(y = yld_pc_attain_plot  , x = typ.str.fill, group = typ.str.fill ),
+    #   geom = "point",  fun.y = "mean", col = "black", size = yd.mean.point.size ,  shape =  yd.mean.point.shape,  fill =  yd.mean.point.color   ) +
     xlab('') +
     coord_cartesian( ylim = c(0.0, 100.0)) +
   ylab('  Percent attainable yield (%)')+
@@ -1162,7 +1178,7 @@ theme(
     panel.grid.minor = element_blank(),
     panel.background = element_blank(),
     axis.title.y =  element_blank(), 
-    strip.text.x = element_text(size =  facet.tx.size.yd, color = 'black'),
+    strip.text.x = element_text(size =  facet.tx.size.yd, face = 'italic' ,color = 'black'),
   strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
     panel.border = element_rect(colour = "black", fill=NA, size=1)
   )
@@ -1170,6 +1186,8 @@ theme(
 fig.intrag.yd.act.b <- ggplot( data = comp[!is.na(comp$typology)   &  !is.na(comp$typ.str)   &  !is.na(comp$typ.str.fill)   ,]  ) +
  geom_boxplot(aes(y = cc.yd.lc.mn.Mg.ha  , x = typ.str.fill , group = typ.str.fill) ,  outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
   stat_boxplot(aes(y = cc.yd.lc.mn.Mg.ha  , x = typ.str.fill, group = typ.str.fill ), geom = 'errorbar' , coef = 10 , color = box.plot.color,  alpha= 5 , lwd= fig.yd.bp.thickness , width = box.error.bar.width) +
+  # stat_summary( aes(y = cc.yd.lc.mn.Mg.ha , x = typ.str.fill, group = typ.str.fill ),
+  #      geom = "point",  fun.y = "mean", col = "black", size = yd.mean.point.size ,  shape =  yd.mean.point.shape,  fill =  yd.mean.point.color   ) +
   ylab(bquote('Actual yield (Mg  '*ha^-1*' '*yr^-1*')    '))+
   facet_grid( cols = vars(typology) , scales = "free_x", space = "free_x")   +
   scale_y_continuous(breaks = seq(0, 3, by = .5), labels = scales::number_format(accuracy = 0.1))+
@@ -1177,17 +1195,18 @@ fig.intrag.yd.act.b <- ggplot( data = comp[!is.na(comp$typology)   &  !is.na(com
     plot.margin = unit(c(p.yd.mg.top , p.yd.mg.right , p.yd.mg.bottom , p.yd.mg.left*.9), "cm"),
     axis.ticks.x = element_blank(),
     axis.ticks.y = element_blank(),
-    axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.0, size = x.tick.fs),
+    axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=1, size = x.tick.fs , face = 'italic' ),
     axis.title.x = element_blank(),
     axis.text.y = element_blank(),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.background = element_blank(),
     axis.title.y =  element_blank(), 
-    strip.text.x = element_text(size =  facet.tx.size.yd, color = 'black'),
+    strip.text.x = element_text(size =  facet.tx.size.yd, face = 'italic' ,color = 'black'),
     strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
     panel.border = element_rect(colour = "black", fill=NA, size=1)
   )
+
 
 
 
@@ -1199,6 +1218,9 @@ fig.intrag.yd.act <<- annotate_figure(fig.intrag.yd.act.b ,   fig.lab = "d", fig
 fig.barintrag.ghgr.t <<-  annotate_figure(fig.barintrag.ghgr.t,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs)
 
 fig.bar.intrag.vop  <<- annotate_figure( fig.bar.intrag.vop.b ,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = label.fs)
+
+
+
 
 
 
@@ -1230,7 +1252,10 @@ fig.interg.dt.prep <- function(){
                  'CO2 seqn. shade',
                  'CO2 seqn. cocoa',
                  'CO2 seqn. fruit',
-                 'CO2 seqn. other')
+                 'CO2 seqn. other',
+                 'CO2 seqn. soil',
+                 'CH4 cocoa'
+                 )
   
   rows <- seq( 1: (3*length(emis.catg)) )
   inter.ghg.dat <- data.frame(  matrix(ncol = length(ghg.dat.var.names) , nrow = length(rows) , dimnames=list(rows  , ghg.dat.var.names )))
@@ -1251,6 +1276,9 @@ fig.interg.dt.prep <- function(){
         if (cat == emis.catg[4] ) {var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr' }
         if (cat == emis.catg[5] ) {var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' }
         if (cat == emis.catg[6] ) {var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr' }
+        if (cat == emis.catg[7] ) {var <- 'lc.SOIL.CO2.Mg.CO2eq' }
+        if (cat == emis.catg[8] ) {var <- 'lc.CH4.Mg.pods.Mg.CO2eq' }
+       
         
         # vr <- var.names[]
         
@@ -1269,6 +1297,8 @@ fig.interg.dt.prep <- function(){
         
         
         inter.ghg.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.95pci' ]))
+        #inter.ghg.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids  , 'lc.GHG.remv.cc.Mg.CO2eq.ha.yr.sd' ]))
+        
         
         inter.ghg.dat[row.count, 'facet.lab' ] <-  'All systems'
         row.count %+=% 1
@@ -1361,6 +1391,8 @@ fig.interg.dt.prep <- function(){
         # Aggregated values
         interg.vop.dat[row.count, 'tot.value.mn' ] <- mean(na.omit(comp[comp$hhID %in% ids, 'lc.net.VOP.1000.usd.per.ha']))
         interg.vop.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids , 'lc.net.VOP.1000.usd.per.ha.95pci']))
+        #interg.vop.dat[row.count, 'tot.value.sd' ] <-  mean(na.omit(comp[comp$hhID %in% ids , 'lc.net.VOP.1000.usd.per.ha.sd']))
+        
         interg.vop.dat[row.count, 'facet.lab' ] <-  'All systems'
         row.count %+=% 1
         
@@ -1373,7 +1405,7 @@ fig.interg.dt.prep <- function(){
   # Absolute GHG
   inter.ghg.dat$Typology <- factor( inter.ghg.dat$Typology   , levels= ordered.typologies)
   
-  ordered.emission.categories <<-   ordered.ab.emission.categories
+ # ordered.emission.categories <<-   ordered.ab.emission.categories
   inter.ghg.dat$Emission.category <- factor( inter.ghg.dat$Emission.category   ,  ordered.emission.categories)
   
   display.names.emission <<-  labels_emis_srcs
@@ -1413,24 +1445,23 @@ fig.params.interg <- function(){
   fig.bar.intergr.vop.p.mg.top <<-  fig.bar.intergr.ghgr.p.mg.top
   fig.bar.intergr.vop.p.mg.left <<-   fig.bar.intergr.ghgr.p.mg.left
   
-  p.mg.interg.ghg.bottom <<- 3
-  p.mg.interg.vop.bottom <<- 2.85
-  #p.mg.interg.yd.bottom <<- 1.25
+  p.mg.interg.ghg.bottom <<- 3.3
+  p.mg.interg.vop.bottom <<- 3.05
 
   p.interg.yd.mg.top <<- 0.2
   p.interg.yd.mg.right <<- 0.2
-  p.interg.yd.mg.bottom  <<- 2.885
+  p.interg.yd.mg.bottom  <<- 3.18
   p.interg.yd.mg.left <<- 0.05
   
   p.interg.yg.mg.top <<- 0.2
   p.interg.yg.mg.right <<- 0.2
-  p.interg.yg.mg.bottom <<- -0.25
+  p.interg.yg.mg.bottom <<- -0.3
   p.interg.yg.mg.left <<- 0.32
   
   interg.leg.key.h.ghg <<- 0.37
-  interg.leg.key.w.ghg <<- 0.37
-  interg.leg.key.h.vop <<- 0.47
-  interg.leg.key.w.vop <<- 0.47
+  interg.leg.key.w.ghg <<- 0.5
+  interg.leg.key.h.vop <<- 0.37
+  interg.leg.key.w.vop <<- 0.6
   
   fig.interg.ghg.x.tick.fs <<- x.tick.fs 
   fig.interg.vop.x.tick.fs <<-  fig.interg.ghg.x.tick.fs 
@@ -1441,8 +1472,11 @@ fig.params.interg <- function(){
   fig.interg.ghg.y.tit.fs <<- 11.5
   fig.interg.vop.y.tit.fs <<- 11.5
   
-  interg.fig.ghg.leg.text.fs <<- 11.5
-  interg.fig.vop.leg.text.fs <<- 10.0
+  interg.fig.ghg.leg.text.fs <<- 8
+  interg.fig.vop.leg.text.fs <<- 8.5
+  
+  interg.leg.space.x.vop <<- 0.3
+  interg.leg.space.y.vop <<- 0.12
   
   fig.interg.yg.y.tick.fs <<- 7
   fig.interg.yg.y.tit.fs <<- 10.0
@@ -1454,15 +1488,19 @@ fig.params.interg <- function(){
   fig.interg.yg.bar.width  <<- 0.65
   
   fig.vop.y.lim.min <<-  -0.25
-  fig.vop.y.lim.max <<- 1.75
-  
-  fig.vop.leg.x.coord <<- 0.58
-  fig.vop.leg.y.coord <<- 0.7
+  fig.vop.y.lim.max <<- 1.875
+
   
   point.size.interg <<- 1.05 * point.size.intrag
   
   facet.tx.size.interg.yg <<- 10.5
   facet.tx.size.interg.yd <<- 10.5
+  
+  fig.ghg.leg.x.coord <<- 0.5
+  fig.ghg.leg.y.coord <<- -0.76
+  
+  fig.vop.leg.x.coord <<-   .7
+  fig.vop.leg.y.coord <<- -0.7
   
 }
 fig.params.interg()
@@ -1475,25 +1513,37 @@ interg.figs <- function(){
     geom_point(aes(y = tot.value.mn    , x = Typology),stat = "identity",  shape = point.type, size = point.size.interg  , color = point.color.border , fill=point.color.fill  , stroke =  point.border.thickness)  +
     geom_errorbar(aes(ymin = tot.value.mn -  tot.value.sd, ymax = tot.value.mn +  tot.value.sd , x = Typology) , width= error.bar.width , size = error.bar.size , color = error.bar.color
     ) +
-    scale_fill_manual(labels = display.names.ab.emission , values = colors_emis_srcs ) +
+    scale_fill_manual(labels =   display.names.emission , values = colors_emis_srcs ) +
     xlab('') +
     ylab('') +
     scale_y_continuous(
-      limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) , breaks = seq(-8.0, 0, by = 2.0), 
+      limits = c( fig.ghg.y.lim.min , fig.ghg.y.lim.max) , breaks = seq(-10.0, 20, by = 2.0), 
       labels = scales::number_format(accuracy = 0.1))  +
+    coord_cartesian( ylim = c(fig.ghg.y.lim.min, fig.ghg.y.lim.max)) +
    facet_wrap(  facet.lab ~ . , ncol = 1, nrow = 1 , scales = "free_x")   +
-    ylab(bquote('Net GHG emissions (Mg   '*CO[2]*'eq '*ha^-1*' '*yr^-1*')     '))  +
+    ylab(bquote('Net GHG emissions (Mg '*CO[2]*'eq '*ha^-1*' '*yr^-1*')       '))  +
     guides(fill = guide_legend(byrow = TRUE)) +
     theme(
-      legend.text = element_text(size = interg.fig.ghg.leg.text.fs),
+      # Legend
+      legend.background = element_rect(fill = 'white', size = 0.35, linetype = "solid",  colour = NA),
+      legend.key.height = unit(intrag.leg.key.h.ghg, 'cm'),
+      legend.key.width = unit(intrag.leg.key.w.ghg, 'cm'),
+      legend.spacing.y = unit(intrag.leg.space.y.ghg, 'cm'),
+      legend.spacing.x = unit(intrag.leg.space.x.ghg  , 'cm'),
+      legend.position = c(fig.ghg.leg.x.coord , fig.ghg.leg.y.coord),
+      legend.margin = margin(1.1 , 1.1 , 1.1 , 1.1) ,
+      legend.title = element_blank(),
+      legend.text = element_text(size =   interg.fig.ghg.leg.text.fs),
+      #
+      #legend.text = element_text(size = interg.fig.ghg.leg.text.fs),
       plot.margin = unit(c(fig.bar.intergr.ghgr.p.mg.top , p.mg.right , p.mg.interg.ghg.bottom , fig.bar.intergr.ghgr.p.mg.left), "cm"),
       axis.ticks.x = element_blank(),
       axis.text.y =  element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
-     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.0, size = fig.interg.ghg.x.tick.fs ),
+     axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=1, face = 'italic' , size = fig.interg.ghg.x.tick.fs ),
     panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
-      legend.position = "none",
+     # legend.position = "none",
       axis.title.y = element_text(size =  y.tit.sz), 
       strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
@@ -1516,21 +1566,32 @@ interg.figs <- function(){
    plot.margin = unit(c(fig.bar.intergr.vop.p.mg.top , p.mg.right ,   p.mg.interg.vop.bottom , fig.bar.intergr.vop.p.mg.left), "cm"),
       axis.ticks.x = element_blank(),
      # axis.ticks.y = element_blank(),
-      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=0.0, size = fig.interg.ghg.x.tick.fs) ,
+      axis.text.x = element_text(angle = x.tick.angle, vjust = 0.5, hjust=1, face = 'italic' ,size = fig.interg.ghg.x.tick.fs) ,
       axis.text.y =  element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
-     legend.text = element_text(size = intrag.fig.vop.leg.text.fs),
-     legend.key.height = unit(intrag.leg.key.h.vop, 'cm'),
-     legend.key.width = unit(intrag.leg.key.w.vop, 'cm'),
-     legend.spacing.x = unit(intrag.leg.space.x.vop, 'cm'),
-     legend.spacing.y = unit(intrag.leg.space.y.vop, 'cm'),
- legend.position = "none",
-     legend.title =  element_blank(),
-   legend.background = element_rect(fill=alpha('white', 0.4)),
-     legend.margin = margin(.00005,.00005,.00005,.00005),
-     legend.box.margin = margin(.00005,.00005,.00005,.00005),
+   # Legend
+   legend.background = element_rect(fill = 'white', size = 0.35, linetype = "solid",  colour = NA),
+   legend.key.height = unit(intrag.leg.key.h.ghg, 'cm'),
+   legend.key.width = unit(intrag.leg.key.w.ghg, 'cm'),
+   legend.spacing.y = unit(interg.leg.space.y.vop, 'cm'),
+   legend.spacing.x = unit(interg.leg.space.x.vop  , 'cm'),
+   legend.position = c(fig.vop.leg.x.coord , fig.vop.leg.y.coord),
+   legend.margin = margin(1.1 , 1.1 , 1.1 , 1.1) ,
+   legend.title = element_blank(),
+   legend.text = element_text(size =   interg.fig.vop.leg.text.fs),
+   
+    # legend.text = element_text(size = intrag.fig.vop.leg.text.fs),
+     #legend.key.height = unit(intrag.leg.key.h.vop, 'cm'),
+     #legend.key.width = unit(intrag.leg.key.w.vop, 'cm'),
+     #legend.spacing.x = unit(intrag.leg.space.x.vop, 'cm'),
+     #legend.spacing.y = unit(intrag.leg.space.y.vop, 'cm'),
+ #legend.position = "none",
+    # legend.title =  element_blank(),
+   #legend.background = element_rect(fill=alpha('white', 0.4)),
+    # legend.margin = margin(.00005,.00005,.00005,.00005),
+    # legend.box.margin = margin(.00005,.00005,.00005,.00005),
    axis.title.y = element_text(size =  y.tit.sz),
  strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
@@ -1539,6 +1600,8 @@ interg.figs <- function(){
   fig.interg.yg.b <- ggplot( data= comp[ !is.na(comp$typology) &  !(comp$hhID %in%  hh_exclude.cc.yd.typ )   &  !is.na(comp$typology)    & !is.na(comp$yld_pc_attain_plot) ,]) +
     stat_boxplot(aes(y = yld_pc_attain_plot  , x = typology, group = typology ), geom = 'errorbar' , coef = 10 , color = box.plot.color,  alpha= 5 , lwd= fig.yd.bp.thickness , width = box.error.bar.width)+
     geom_boxplot(aes(y = yld_pc_attain_plot  , x = typology, group = typology), width = fig.interg.yg.bar.width , outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 ,  lwd= fig.yd.bp.thickness , fatten = fig.yd.bp.fatten )+
+    #  stat_summary( aes(y = yld_pc_attain_plot  , x = typology, group = typology ),
+    #   geom = "point",  fun.y = "mean", col = "black", size = yd.mean.point.size ,  shape =  yd.mean.point.shape,  fill =  yd.mean.point.color   ) +
     xlab('') +
     ylab('')+
     coord_cartesian(ylim=c(0, 100.0)) +
@@ -1548,7 +1611,7 @@ interg.figs <- function(){
     theme(
       plot.margin = unit(c( p.interg.yg.mg.top  , p.interg.yg.mg.right, p.interg.yg.mg.bottom, p.interg.yg.mg.left), "cm"), 
       axis.ticks.x = element_blank(),
-      axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
+      axis.text.y = element_text(vjust = 0.5, hjust=01, size = y.tick.fs),
       axis.text.x = element_blank(),   panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
@@ -1560,7 +1623,9 @@ interg.figs <- function(){
 
   fig.interg.yd.act.b <- ggplot( data= comp[ !is.na(comp$typology) &  !(comp$hhID %in%  hh_exclude.cc.yd.typ )   &  !is.na(comp$typology)    & !is.na(comp$cc.yd.lt.mn.Mg.ha) ,]) +
     geom_boxplot(aes(y = cc.yd.lc.mn.Mg.ha   , x = typology, group = typology), width = fig.interg.yg.bar.width ,  outlier.shape = NA, coef = 5 , color = box.plot.color , fill = box.plot.fill.color , alpha= 0.5 ,  lwd= fig.yd.bp.thickness ,  fatten = fig.yd.bp.fatten)+
-    stat_boxplot(aes(y = cc.yd.lc.mn.Mg.ha   , x = typology, group = typology ), geom = 'errorbar' , coef = 10 , color = box.plot.color,  alpha= 5 , lwd= fig.yd.bp.thickness , width = box.error.bar.width)+
+    #stat_boxplot(aes(y = cc.yd.lc.mn.Mg.ha   , x = typology, group = typology ), geom = 'errorbar' , coef = 10 , color = box.plot.color,  alpha= 5 , lwd= fig.yd.bp.thickness , width = box.error.bar.width)+
+    #  stat_summary( aes(y = cc.yd.lc.mn.Mg.ha , x = typology, group = typology  ),
+    #   geom = "point",  fun.y = "mean", col = "black", size = yd.mean.point.size ,  shape =  yd.mean.point.shape,  fill =  yd.mean.point.color   ) +
     xlab('') +
     ylab('') +
     coord_cartesian(ylim=c(0,  1.5)) +
@@ -1570,13 +1635,13 @@ interg.figs <- function(){
     theme(
       plot.margin = unit(c( p.interg.yd.mg.top  , p.interg.yd.mg.right, p.interg.yd.mg.bottom, p.interg.yd.mg.left), "cm"),
       axis.ticks.x = element_blank(),
-  axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs),
-      axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0, size = fig.interg.yg.x.tick.fs ),
+  axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = y.tick.fs , face = 'italic'  ),
+      axis.text.x = element_text( face = 'italic' , angle = x.tick.angle , vjust = 0.5, hjust=1, size = fig.interg.yg.x.tick.fs ),
     panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_blank(),
       axis.title.y = element_text(size =    fig.interg.yg.y.tit.fs ),
-      strip.text.x = element_text(size =    facet.tx.size.interg.yd , color = 'black'),
+      strip.text.x = element_text(size =    facet.tx.size.interg.yd , face = 'italic' ,color = 'black'),
       strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
       panel.border = element_rect(colour = "black", fill=NA, size=1)
     )  
@@ -1642,627 +1707,887 @@ fig.bar.interg.vop
 fig.interg.yg
 fig.interg.yd.act 
 
-comp <<- comp
-stop()
+# Correlation plot
 
-# Table outputs
-
-tb.typ.agfo <- function(){
+corr.plot.gen <- function(){
   
-  typologies <- c(
-                'Hybrid sun',
-                'Hybrid shade',
-                'Amazonia'
-                 )
   
-  agfor.dat <- data.frame( stringsAsFactors=FALSE)
-  agfor.dat <- 0
-  
-  for (T in typologies){
+  cor.plot.data.prep.intra <- function(){
     
-  v.name <- 'typ.str.fill'
-  v1 <- 'tree.count.per.ha'  
-  v2 <- 'plot.quant.shade.trees.ha'
-  v3 <- 'plot.quant.trees.per.ha.greater.than.20.m'
-  v4 <- 'plot.quant.trees.per.ha.greater.than.35.m' 
-  v5 <- 'plot.quant.trees.per.ha.greater.than.50.m'
-  
-  v6 <- 'plot.quant.short.trees.ha' 
-  v7 <- 'unique.tree.species' 
-  v8 <- 'num_other_root_grain_crops'
-  
-
-  v.name.dat <- data.frame()
-  v0.dat <- data.frame()
-  v1.dat <- data.frame()
-  v2.dat <- data.frame()
-  v3.dat <- data.frame()
-  v4.dat <- data.frame()
-  v5.dat <- data.frame()
-  v6.dat <- data.frame()
-  v7.dat <- data.frame()
-  v8.dat <- data.frame()
-  
-  v.name.dat <- 0
-  v0.dat <- 0
-  v1.dat <- 0
-  v2.dat <- 0 
-  v3.dat <- 0 
-  v4.dat <- 0 
-  v5.dat <- 0 
-  v6.dat <- 0
-  v7.dat <- 0 
-  v8.dat <- 0
-  
-  comp$typ <- as.numeric((comp$typ))
-  
-  insert <<- " \u00B1 "
-  
-  if (T == "Hybrid sun") {  clust.quant <- num.clusts.hysn}
-  if (T == "Hybrid shade") {  clust.quant <- num.clusts.hysh}
-  if (T == "Amazonia") {  clust.quant <- num.clusts.amz}
-  
-
-  for ( t in 1:clust.quant ){
     
-    tp <- t
-    
-    ids <- comp[!is.na(comp$typ.str) & comp$typ.str == tp & (comp$typology == T) , 'hhID'] 
-    
-    # Name of cluster
-    name <- unique(comp[(comp$hhID %in% ids ) , v.name] )
-    v.name.dat <- append(v.name.dat ,  name )
-    
-    # Variable 0
-    v0 <- nrow( comp[(comp$hhID %in% ids ) , ] )
-
-    v0.dat <- append(v0.dat ,  v0 )
-    
-    # Variable 1
-    v1.m <- mean( na.omit(comp[(comp$hhID %in% ids ) , v1] ))
-    v1.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v1] ))
-    
-    v1.m <- round( v1.m , 0)
-    v1.sd <- round( v1.sd ,0) 
-      
-    v1.d <- str_c(v1.m , insert , v1.sd )
-    if (length(ids) == 1) {v1.d <- v1.m  }
-    v1.dat <- append(v1.dat ,  v1.d )
-    
-    # Variable 2
-    v2.m <-   mean( na.omit(comp[(comp$hhID %in% ids ), v2] ))
-    v2.sd <-    sd( na.omit(comp[(comp$hhID %in% ids ) , v2] ))
-    
-    v2.m <- round( v2.m , 1)
-    v2.sd <- round( v2.sd , 1) 
-    
-    v2.d <- str_c(v2.m , insert , v2.sd )
-    if (length(ids) == 1) {v2.d <- v2.m  }
-    v2.dat <- append(v2.dat ,  v2.d )
-    
-    # Variable 3
-    v3.m <-  mean( na.omit(comp[(comp$hhID %in% ids ), v3] ))
-    v3.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v3] ))
-    
-    v3.m <- round( v3.m , 1)
-    v3.sd <- round( v3.sd , 1) 
-    
-    v3.d <- str_c(v3.m , insert , v3.sd )
-    if (length(ids) == 1) {v3.d <- v3.m  }
-    v3.dat <- append(v3.dat ,  v3.d )
-    
-    # Variable 4
-    v4.m <- mean( na.omit(comp[(comp$hhID %in% ids ), v4] ))
-    v4.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v4] ))
-    
-    v4.m <- round( v4.m , 1)
-    v4.sd <- round( v4.sd , 1) 
-    
-    v4.d <- str_c(v4.m , insert , v4.sd )
-    if (length(ids) == 1) {v4.d <- v4.m  }
-    v4.dat <- append(v4.dat ,  v4.d )
-    
-    # Variable 5
-    v5.m <- mean( na.omit(comp[(comp$hhID %in% ids ), v5] ))
-    v5.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v5] ))
-    
-    v5.m <- round( v5.m , 1)
-    v5.sd <- round( v5.sd , 1) 
-    
-    v5.d <- str_c(v5.m , insert , v5.sd )
-    if (length(ids) == 1) {v5.d <- v5.m  }
-    v5.dat <- append(v5.dat ,  v5.d )
-
-    # Variable 6
-    v6.m <-  mean( na.omit(comp[(comp$hhID %in% ids ), v6] ))
-    v6.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v6] ))
-    
-    v6.m <- round( v6.m , 1)
-    v6.sd <- round( v6.sd , 1) 
-    
-    v6.d <- str_c(v6.m , insert , v6.sd )
-    if (length(ids) == 1) {v6.d <- v6.m  }
-    v6.dat <- append(v6.dat ,  v6.d )
-    
-    # Variable 7
-    v7.m <- mean( na.omit(comp[(comp$hhID %in% ids ), v7] ))
-    v7.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v7] ))
-    
-    v7.m <- round( v7.m , 1)
-    v7.sd <- round( v7.sd , 1) 
-    
-    v7.d <- str_c(v7.m , insert , v7.sd )
-    if (length(ids) == 1) {v7.d <- v7.m  }
-    v7.dat <- append(v7.dat ,  v7.d )
-    
-    # Variable 8
-    v8.m <- mean( na.omit(comp[(comp$hhID %in% ids ), v8] ))
-    v8.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v8] ))
-    
-    v8.m <- round( v8.m , 1)
-    v8.sd <- round( v8.sd , 1) 
-    
-    v8.d <- str_c(v8.m , insert , v8.sd )
-    if (length(ids) == 1) {v8.d <- v8.m  }
-    v8.dat <- append(v8.dat ,  v8.d )
-    
+    comp$shade.tree.to.cm.tree.ratio.pct <-  comp$shade.tree.to.cm.tree.ratio * 100
    
     
-  }
-  
-  v.name.dat <- v.name.dat[ -c(1)]
-  v0.dat <-  v0.dat[ -c(1)]
-  v1.dat <-  v1.dat[ -c(1)]
-  v2.dat <-  v2.dat[ -c(1)]
-  v3.dat <-  v3.dat[ -c(1)]
-  v4.dat <-  v4.dat[ -c(1)]
-  v5.dat <-  v5.dat[ -c(1)]
-  v6.dat <-  v6.dat[ -c(1)]
-  v7.dat <-  v7.dat[ -c(1)]
-  v8.dat <-  v8.dat[ -c(1)]
-  
-  typ.dat <- cbind(
-    v.name.dat,
-    v0.dat,
-    v1.dat,
-    v2.dat,
-    v3.dat,
-    v4.dat,
-    v5.dat,
-    v6.dat,
-    v7.dat,
-    v8.dat
-  )
-  
-  agfor.dat <- rbind(  agfor.dat,typ.dat)
-  #  View(agfor.dat)
-  
-  
+    comp$elev <- NA
+    comp$temp.mmm <- NA
+    comp$precip <- NA
+    
+    for (id in T.df$hhID){
+      
+      comp[comp$hhID == id , 'elev'] <-  T.df[T.df$hhID == id , 'elev']
+      comp[comp$hhID == id , 'temp.mmm'] <-  T.df[T.df$hhID == id , 'temp.mmm']
+      comp[comp$hhID == id , 'precip'] <-  T.df[T.df$hhID == id , 'precip']
+    }
+    comp <<- comp
 
-  }
-  
-#  agfor.dat <-  na.omit(agfor.dat[])
-  agfor.dat <- agfor.dat[-c(1),]
+    
+    cor.data.intra.var.names <- c('name' , 
+                                  'name.2r',
+                                  'typ',
+                                  'typology' ,
+                                  'variable.cat',
+                                  # variable values
+                                  'typ.mn' ,
+                                  'sys.mn',
+                                  'var.v',
+                                  'var.s',
+                                  'dir.d',
+                                  'dir.d.str',
+                                  'var.label'
+    )
+    
+    
+    cor.data.var.names <<- c('yld_pc_attain_plot' , 
+                             'tree.count.per.ha' ,
+                             'shade.tree.to.cm.tree.ratio.pct' , 
+                             'plot.quant.trees.per.ha.greater.than.20.m' , 
+                             'plot.quant.trees.per.ha.greater.than.35.m' ,
+                             'plot.quant.trees.per.ha.greater.than.50.m' ,
+                             'unique.tree.species' ,
+                             'num_other_root_grain_crops' ,
+                             
+                             'total_N_fert_applied_kg_per_ha' , 
+                             'total_non_N_fert_applied_kg_per_ha' ,
+                             'prunes_per_year' ,
+                             'weeds_per_year' ,
+                             'pollination.bool' ,
+                             'insecticides.bool' ,
+                             'fungicides.bool' ,
+                             'herbicides.bool' ,
+                             
+                             'detect.bool.blackpod' ,
+                             'detect.bool.capsid' ,
+                             'detect.bool.stemborer' ,
+                             'water.log.bool', 
+                             'elev',
+                            'temp.mmm',
+                             'precip'
+                             )
+    
 
-  
-  colnames(agfor.dat) = c(
-    'Cluster name',
-                   'n',
-                   'Cocoa tree density (per ha)',
-                   'Shade to cocoa trees (%)',   
-                   '# trees > 20 m high',
-                   '# trees > 35 m high',
-                   '# trees > 50 m high',
-                   'Other short trees to cocoa (%)',
-                   '# tree crops',
-                   '# root or grain crops')
-  
-  path_out = '.\\Figures.out\\'
-  fileName = paste(path_out, 'table_typology.agfo.csv',sep = '')
-  write.csv.utf8.BOM(  agfor.dat  ,  file =   fileName  ) 
-  #  View(agfor.dat)
-  
-
-  agfor.dat <<- agfor.dat  
-  
-  
-  
-  
-  
-}
-tb.typ.agfo() 
-
-
-tb.typ.pract <- function(){
-  
-  typologies <- c( 'Hybrid sun',
-    'Hybrid shade',
-    'Amazonia'
-  )
-  
-  pract.dat <- data.frame()
-  pract.dat <- 0
-  
-  for (T in typologies){
     
-    v.name <- 'typ.str.fill'
-    v1 <- 'total_N_fert_applied_kg_per_ha'
-    v2 <- 'total_non_N_fert_applied_kg_per_ha'
-    v3 <- 'prunes_per_year'
-    v4 <- 'weeds_per_year'
-    v5 <- 'pollination.bool'
-    v6 <- 'insecticides.bool'
-    v7 <- 'fungicides.bool'
-    v8 <- 'herbicides.bool'
-    v9 <- 'detect.bool.blackpod'
-    v10 <- 'detect.bool.capsid'
-    v11 <- 'detect.bool.stemborer'
+    cor.data.var.labels.old <<- c( '% attainable yield',
+                               'Cocoa tree density (trees/ha)',
+                               'Shade to cocoa trees',
+                               'Short shade trees (%)',
+                               'Medium shade trees (/ha)',
+                               'Tall shade trees (/ha)',
+                               'Unique tree species(/900 m^2)',
+                               'Unique crop species (/900 m^2)',
+                               
+                               'N fertiliser (kg/ha/yr)' , 
+                               'Non N-fertiliser (kg/ha/yr)' , 
+                               'Pruning frequency (/year)' ,
+                               'Weeding frequency  (/year)' ,
+                               'Pollination (dummy)' ,
+                               'Insecticides (dummy)' ,
+                               'Fungicides (dummy)' ,
+                               'Herbicides (dummy)' ,
+                               
+                               'Blackpod (dummy)' ,
+                               'Capsid (dummy)' ,
+                               'Stemborer (dummy)' ,
+                               'Water logged (dummy)' ,
+                               'Elevation (m asl)',
+                               'Max. temp (Celsius)',
+                               'Rainfall (mm/month)'
+                               )
     
-    v.name.dat <- data.frame()
-    v0.dat <- data.frame()
-    v1.dat <- data.frame()
-    v2.dat <- data.frame()
-    v3.dat <- data.frame()
-    v4.dat <- data.frame()
-    v5.dat <- data.frame()
-    v6.dat <- data.frame()
-    v7.dat <- data.frame()
-    v8.dat <- data.frame()
-    v9.dat <- data.frame()
-    v10.dat <- data.frame()
-    v11.dat <- data.frame()
+    cor.data.var.labels <<- c( '% attainable yield',
+                               'Cocoa tree density',
+                               'Shade to cocoa trees',
+                               'Short shade trees',
+                               'Medium shade trees',
+                               'Tall shade trees',
+                               'Unique tree species',
+                               'Unique crop species',
+                               
+                               'N fertiliser' , 
+                               'Non N-fertiliser' , 
+                               'Pruning frequency' ,
+                               'Weeding frequency' ,
+                               'Pollination' ,
+                               'Insecticides' ,
+                               'Fungicides' ,
+                               'Herbicides' ,
+                               'Blackpod' ,
+                               'Capsid' ,
+                               'Stemborer' ,
+                               'Water logged' ,
+                               'Elevation',
+                               'Max. temp',
+                               'Rainfall'
+    )
     
-    v.name.dat <- 0
-    v0.dat <- 0
-    v1.dat <- 0
-    v2.dat <- 0 
-    v3.dat <- 0 
-    v4.dat <- 0 
-    v5.dat <- 0 
-    v6.dat <- 0
-    v7.dat <- 0 
-    v8.dat <- 0 
-    v9.dat <- 0 
-    v10.dat <- 0 
-    v11.dat <- 0
+    cor.data.var.labels.2r <<- c( '% attainable\nyield',
+                                 'Cocoa tree\ndensity',
+                                 'Shade to\ncocoa trees',
+                                 'Short\nshade trees',
+                                 'Medium\nshade trees',
+                                 'Tall shade\ntrees',
+                                 'Unique\ntree species',
+                                 'Unique\ncrop species',
+                                 
+                                 'N fertiliser' , 
+                                 'Non\nN-fertiliser' , 
+                                 'Pruning\nfrequency' ,
+                                 'Weeding\nfrequency' ,
+                                 'Pollination' ,
+                                 'Insecticides' ,
+                                 'Fungicides' ,
+                                 'Herbicides' ,
+                                 'Blackpod' ,
+                                 'Capsid' ,
+                                 'Stemborer' ,
+                                 'Water logged' ,
+                                 'Elevation',
+                                 'Max. temp',
+                                 'Rainfall'
+    )
     
-    comp$typ <- as.numeric((comp$typ))
     
-    insert <<- ' \u00B1 '
+    cor.data.variable.cats <<- c('Yield',
+                                 'Vegetative structure & diversity',
+                                 'Vegetative structure & diversity',
+                                 'Vegetative structure & diversity',
+                                 'Vegetative structure & diversity',
+                                 'Vegetative structure & diversity',
+                                 'Vegetative structure & diversity',
+                                 'Vegetative structure & diversity',
+                                 
+                                 'Inputs', 
+                                 'Inputs', 
+                                 'Practices', 
+                                 'Practices', 
+                                 
+                                 'Inputs', 
+                                 'Inputs', 
+                                 'Inputs', 
+                                 'Inputs', 
+                                 'Yield constraining factors', 
+                                 'Yield constraining factors', 
+                                 'Yield constraining factors', 
+                                 'Yield constraining factors', 
+                                 'Climate conditions',
+                                 'Climate conditions',
+                                 'Climate conditions'
+                                 )
     
-    if (T == "Hybrid sun") {  clust.quant <- num.clusts.hysn}
-    if (T == "Hybrid shade") {  clust.quant <- num.clusts.hysh}
-    if (T == "Amazonia") {  clust.quant <- num.clusts.amz}
+    ordered.cluster.names.2r <- c(
+      "Fertiliser &\nHigh elevation"   ,
+      "Fertiliser &\nLow elevation" ,      
+      "Labour &\nFertiliser"  ,
+      "Weeding &\nWaterlogged",   
+      "Low tree\ndensity"    ,         
+      "Cluster num 6"      ,
+     "Nutrient\ndeficient"    ,
+      "High tree\ndensity"       ,
+      "Open & Complex\nfertilisation"  ,
+      "Dense & Complex\nfertilisation" ,
+      "N-fertilisation\n& Pollination"   ,
+      "Cluster num 12"     ,
+     "Nutrient deficient\n& High elevation" ,
+      "Nutrient deficient\n& Low elevation" ,
+      "N-fertilisation"  ,
+       "Fertiliser &\nTall canopy"  ,
+       "Cluster num 17"       ,
+       "Cluster num 18" 
+    )
+      
     
-    for ( t in 1:clust.quant){
+    num.vars <- length(cor.data.var.names)
+    num.typs <- 18
+    rows <- seq(1,18 * num.vars,1)
+    
+    cor.intrag  <-   data.frame(  matrix(ncol = length( cor.data.intra.var.names  ) , nrow = length(rows) , dimnames=list(rows  ,   cor.data.intra.var.names  )))
+    
+    
+    start.hs <- 1
+    end.hs <- 6 * length(cor.data.var.names)
+    
+    start.hsn <-   end.hs +1 
+    end.hsn <-  12 * length(cor.data.var.names)
+    
+    start.az <-  end.hsn +1 
+    end.az <- 18 * length(cor.data.var.names)
+    
+    cor.intrag[seq(  start.hs  : end.hs  ), 'typology'] <- 'Hybrid sun'
+    cor.intrag[   seq( start.hsn   ,  end.hsn)  , 'typology'] <- 'Hybrid shade'
+    cor.intrag[   seq( start.az   ,    end.az)  , 'typology'] <- 'Amazonia'
+    
+    row.count <- 1
+    circle.size.scale <<- 1
+    
+    #View(cor.intrag)
+    
+    #for (t in 1:20){
+    # summary(comp[ !is.na(comp$typology) , cor.data.var.names[t] ])
+    # }
+    
+    #summary(comp[ !is.na(comp$typology) , cor.data.var.names[20] ])
+    
+    for (r in seq(1:(num.typs))  ) { 
       
-      tp <- t
-      
-      ids <- comp[!is.na(comp$typ.str) & comp$typ.str == tp & (comp$typology == T) , 'hhID'] 
-
-      # Name of cluster
-      name <- unique(comp[(comp$hhID %in% ids ) , v.name] )
-      v.name.dat <- append(v.name.dat ,  name )
-      
-      # Number of observations
-      v0 <- nrow(comp[(comp$hhID %in% ids ) ,] )
-      
-      v0.dat <- append(v0.dat ,  v0 )
-      
-      # Variable 1
-      v1.m <- mean( na.omit(comp[(comp$hhID %in% ids ) , v1] ))
-      v1.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v1] ))
-      
-      v1.m <- round( v1.m , 0)
-      v1.sd <- round( v1.sd , 0) 
-      
-      v1.d <- str_c(v1.m , insert , v1.sd )
-      if (length(ids) == 1) {v1.d <- v1.m  }
-      v1.dat <- append(v1.dat ,  v1.d )
-      
-      
-      # Variable 2
-      v2.m <- mean( na.omit(comp[(comp$hhID %in% ids ), v2] ))
-      v2.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v2] ))
-      
-      v2.m <- round( v2.m , 0)
-      v2.sd <- round( v2.sd , 0) 
-      
-      v2.d <- str_c(v2.m , insert , v2.sd )
-      if (length(ids) == 1) {v2.d <- v2.m  }
-      v2.dat <- append(v2.dat ,  v2.d )
-      
-      
-      # Variable 3
-      v3.m <- mean( na.omit(comp[(comp$hhID %in% ids ) , v3] ))
-      v3.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v3] ))
-      
-      v3.m <- round( v3.m , 1)
-      v3.sd <- round( v3.sd , 1) 
-      
-      v3.d <- str_c(v3.m , insert , v3.sd )
-      if (length(ids) == 1) {v3.d <- v3.m  }
-      v3.dat <- append(v3.dat ,  v3.d )
-      
-      # Variable 4
-      v4.m <- mean( na.omit(comp[(comp$hhID %in% ids ) , v4] ))
-      v4.sd <- sd( na.omit(comp[(comp$hhID %in% ids ) , v4] ))
-      
-      v4.m <- round( v4.m , 1)
-      v4.sd <- round( v4.sd , 1) 
-      
-      v4.d <- str_c(v4.m , insert , v4.sd )
-      if (length(ids) == 1) {v4.d <- v4.m  }
-      v4.dat <- append(v4.dat ,  v4.d )
-      
-      # Variable 5
-      v5.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v5] )) 
-      
-      v5.m <- round( v5.m , 0)
-      
-      v5.dat <- append(v5.dat ,  v5.m )
-      
-      
-      # Variable 6
-      v6.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v6] )) 
-      
-      v6.m <- round( v6.m , 0)
-      
-      v6.dat <- append(v6.dat ,  v6.m )
-      
-      
-      # Variable 7
-      v7.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v7] )) 
-      
-      v7.m <- round( v7.m , 0)
-      
-      v7.dat <- append(v7.dat ,  v7.m )
-      
-      # Variable 8
-      v8.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v8] )) 
-      
-      v8.m <- round( v8.m , 0)
+      for (n in 1:length(cor.data.var.names)) {
         
-      v8.dat <- append(v8.dat ,  v8.m )
+        cor.intrag[row.count,'typ'] <- r
+        cor.intrag[row.count,'name']  <- ordered.cluster.names[r]
+        cor.intrag[row.count,'name.2r']  <- ordered.cluster.names.2r[r]
+        cor.intrag[row.count,'variable.name']  <-   cor.data.var.names [n]
+        cor.intrag[row.count,'variable.label']  <-   cor.data.var.labels[n]
+        cor.intrag[row.count,'variable.label.2r']  <-   cor.data.var.labels.2r[n]
+        cor.intrag[row.count,'variable.cat']  <-  cor.data.variable.cats[n]
+        
+        
+        
+        current.typology <-   cor.intrag[row.count, 'typology']
+        
+        typ.mn.val <-   mean(na.omit(comp[!is.na(comp$typ.str.fill ) & comp$typ.str.fill  == ordered.cluster.names[r] & !is.na(comp$typ) & comp$typology == current.typology & !is.na(comp$typology)  ,      cor.data.var.names[n] ]))
+        
+        typ.sd.val  <-  sd(na.omit(comp[!is.na(comp$typ.str.fill ) & comp$typ.str.fill  == ordered.cluster.names[r] & !is.na(comp$typ) & comp$typology == current.typology & !is.na(comp$typology)  ,      cor.data.var.names[n] ]))
+        
+        
+        other.types.str <- unique( comp[comp$typology == current.typology &  comp$typ.str.fill != ordered.cluster.names[r] & !is.na(comp$typ.str.fill), 'typ.str.fill'])
+        
+        sys.mean.val  <- 0.0001 
+        
+        sys.mean.val  <- .01 + mean(na.omit(comp[ !is.na(comp$typ) & comp$typ.str.fill  %in% other.types.str & comp$typology == current.typology & !is.na(comp$typology) ,  cor.data.var.names[n]])) 
+        
       
-      # Variable 9
-      v9.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v9] )) 
+        
+        
+        print(paste('Typ mean is ' , typ.mn.val))
+        print(paste('System mean is ' , sys.mean.val))
+        
+        cor.intrag[row.count, 'typ.mn'] <-  typ.mn.val
+        cor.intrag[row.count, 'sys.mn'] <- sys.mean.val
+        
+         cor.intrag[row.count, 'var.v'] <-  (  typ.mn.val
+                -  sys.mean.val ) /    sys.mean.val 
+        
+        sys.sd.val  <- sd(na.omit(comp[ !is.na(comp$typ) & comp$typ.str.fill  %in% other.types.str & comp$typology == current.typology & !is.na(comp$typology) ,  cor.data.var.names[n]])) 
+        
+        # Define text/label to use in plot 
+        if (  !is.na(typ.mn.val ) & typ.mn.val >= 10) { dec.rd <- 0 } else if (  !is.na(typ.mn.val ) &   typ.mn.val > -100) {
+          dec.rd <- 1 } else {dec.rd <- 1}
+        mean.val <- round(  typ.mn.val ,  dec.rd ) 
+        sd.val <- round(    typ.sd.val , dec.rd )
+        
+        # If no decimals, add a decimal (to keep consistent)
+        if ( !is.na(mean.val) & nchar(mean.val) == 1 ) { mean.val <- str_c( mean.val , '.0')}
+        if ( !is.na(   sd.val) & nchar(sd.val) == 1 ) {    sd.val <- str_c(    sd.val , '.0')}
+       
+        if (mean.val == '0.0' & !is.na(mean.val) & sd.val == '0.0' & !is.na(d.val) ){
+          cor.intrag[row.count, 'var.label'] <- '-'
+        } else {
+      cor.intrag[row.count, 'var.label'] <- str_c(  mean.val,'\n(',  sd.val , ')')
+        }
+        
+        
+        
+        if ( typ.mn.val >= sys.mean.val & !is.na( sys.mean.val ) & !is.na( typ.mn.val ))  {      cor.intrag[row.count,'dir.d']  <- 1 }  
+        if ( typ.mn.val < sys.mean.val & !is.na( sys.mean.val ) & !is.na( typ.mn.val ))  {     cor.intrag[row.count,'dir.d']  <- -1 }  
+        
+        g1 <- na.omit(comp[comp$typ.str.fill == ordered.cluster.names[r]  & !is.na(comp$typ.str.fill) & comp$typology ==    current.typology, cor.data.var.names[n] ])
+        g2 <- na.omit(comp[comp$typ.str.fill != ordered.cluster.names[r]  & !is.na(comp$typ.str.fill) & comp$typology ==    current.typology , cor.data.var.names[n] ])
+        
+        
+        if (length(g1) > 0 & length(g2) > 0  & mean(g1) != mean(g2)){
+          
+          #  t.test.res <-  t.test(g1 , g2, alternative = "two.sided", var.equal = FALSE)
+          
+          t.test.res <- wilcox.test(g1, g2, alternative = "two.sided" , var.equal = FALSE)
+          
+          cor.intrag[row.count, 'var.s']     <- t.test.res$p.value
+        } else {
+          cor.intrag[row.count, 'var.s']  <-  runif(1,0.3,0.95)
+         
+        
+        }
+        
+        print(paste(n))
+        print(paste('Typology is ' , current.typology))
+        row.count <-   row.count + 1 
+        
+      }
       
-      v9.m <- round( v9.m , 0)
       
-      v9.dat <- append(v9.dat ,  v9.m )
-      
-      # Variable 10
-      v10.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v10] )) 
-      
-      v10.m <- round( v10.m , 0)
-      
-      v10.dat <- append(v10.dat ,  v10.m )
-      
-      # Variable 11
-      v11.m <- 100*mean( na.omit(comp[(comp$hhID %in% ids ) , v11] )) 
-      
-      v11.m <- round( v11.m , 0)
-      
-      v11.dat <- append(v11.dat ,  v11.m )
-
- 
     }
-    v.name.dat <- v.name.dat[ -c(1)]  
-    v0.dat <-  v0.dat[ -c(1)]
-    v1.dat <-  v1.dat[ -c(1)]
-    v2.dat <-  v2.dat[ -c(1)]
-    v3.dat <-  v3.dat[ -c(1)]
-    v4.dat <-  v4.dat[ -c(1)]
-    v5.dat <-  v5.dat[ -c(1)]
-    v6.dat <-  v6.dat[ -c(1)]
-    v7.dat <-  v7.dat[ -c(1)]
-    v8.dat <-  v8.dat[ -c(1)]
-    v9.dat <-  v9.dat[ -c(1)]
-    v10.dat <-  v10.dat[ -c(1)]
-    v11.dat <-  v10.dat[ -c(1)]
     
-    typ.dat <- cbind(
-      v.name.dat,
-      v0.dat,
-      v1.dat,
-      v2.dat,
-      v3.dat,
-      v4.dat,
-      v5.dat,
-      v6.dat,
-      v7.dat,
-      v8.dat,
-      v9.dat,
-      v10.dat, 
-      v11.dat
+    variable.cats.ordered <<-  c('Yield' , "Vegetative structure & diversity" , "Practices" , "Inputs" , "Yield constraining factors" ,  'Climate conditions' )
+    ordered.dir.d <- c('1','-1')
+    
+    cor.intrag[cor.intrag$dir.d == -1 & !is.na(cor.intrag$dir.d),'dir.d.str']<- '-ve'
+    cor.intrag[cor.intrag$dir.d == 1 & !is.na(cor.intrag$dir.d) ,'dir.d.str']<- '+ve'
+    
+    cor.intrag$typology <- factor( cor.intrag$typology   , levels= ordered.typologies)
+    cor.intrag[,'name'] <- factor(  cor.intrag[,'name'] , levels = ordered.cluster.names)
+    cor.intrag[,'name.2r'] <- factor(  cor.intrag[,'name.2r'] , levels = ordered.cluster.names.2r)
+    cor.intrag[,'variable.name'] <- factor(   cor.intrag[,'variable.name'] , levels =   cor.data.var.names  )
+    cor.intrag[,'dir.d'] <- factor(  cor.intrag[,'dir.d'] , levels = ordered.dir.d)
+    cor.intrag[,'variable.cat'] <- factor(  cor.intrag[,'variable.cat'] , levels =    variable.cats.ordered )
+    cor.intrag[,'variable.label'] <- factor(  cor.intrag[,'variable.label'] , levels =    cor.data.var.labels )
+    cor.intrag[,'variable.label.2r'] <- factor(  cor.intrag[,'variable.label.2r'] , levels =    cor.data.var.labels.2r )
+    
+    cor.intrag$var.label
+    
+    rc <- 1 
+    
+    sign.thresh <<- 0.1
+    
+    cor.intrag[ !is.na(cor.intrag$var.s) , 'var.s.c' ] <- (cor.intrag[  !is.na(cor.intrag$var.s) , 'var.s' ] ) /   sign.thresh
+    cor.intrag[ !is.na(cor.intrag$var.s) & cor.intrag$var.s >=   sign.thresh , 'var.s.c' ] <- 1.0
+    
+    cor.intrag[ !is.na(cor.intrag$var.s.c) & cor.intrag$var.s.c >= 1, 'var.s.c' ] <- 1.0
+    
+    
+    
+    
+    
+    cor.intrag <<-   cor.intrag[!str_detect(cor.intrag$name ,'Cluster') & !is.na(cor.intrag$name)  , ]
+    
+    cor.intrag$var.sign.label <- round( cor.intrag$var.s , 2)
+    cor.intrag[cor.intrag$var.sign.label == 0 , 'var.sign.label' ] <- "<0.01"
+    
+    cor.intrag <<- cor.intrag
+    
+  }
+  cor.plot.data.prep.intra()
+  
+  #View(cor.intrag)
+  
+  cor.plot.data.prep.inter <- function(){
+    
+    cor.data.inter.var.names <- c(
+      'typology' ,
+      'variable.cat',
+      # variable values
+      'Facet.label' , 
+      'var.v',
+      'var.s',
+      'dir.d',
+      'dir.d.str',
+      'var.label'
     )
     
     
     
-    pract.dat <- rbind(pract.dat,typ.dat)
+    num.vars <- length(cor.data.var.names)
+    num.typologies <- 3
+    rows <- seq(1,  num.typologies *  num.vars ,1)
     
-    #  View(pract.dat)
+    cor.interg <-   data.frame(  matrix(ncol = length(cor.data.inter.var.names ) , nrow = length(rows) , dimnames = list(rows  , cor.data.inter.var.names  )))
     
+    start.hs <- 1
+    end.hs <-  length(cor.data.var.names)
     
+    start.hsn <-   end.hs +1 
+    end.hsn <-  2 * length(cor.data.var.names)
     
-  }
-  
-  pract.dat <- na.omit(pract.dat)
-  pract.dat <- pract.dat[-c(1),]
-  
-  
-  
-  colnames(pract.dat) = c(
-    'Cluster',
-    'n',
-                        'N-fert (kg/ha/yr)',
-                        'Non N-fert (kg/ha/yr)',
-                        'Pruning (#/yr)',
-                        'Weeding (#/yr)',
-                        'Pollination (dummy)',
-                        'Insecticide (dummy)',
-                        'Fungicides (dummy)',
-                        'Herbicides (dummy)',
-    'Black pod detection rate (%)',
-    'Capsid detection rate (%)',
-    'Stemborer detection rate (%)'
-  )
-  
-  #pract.dat <<-  na.omit(pract.dat[])
-
-  path_out = '.\\Figures.out\\'
-  fileName = paste(path_out, 'table_typology.pract.csv',sep = '')
-  write.csv.utf8.BOM(  pract.dat  ,   file = fileName)  # Export
-  
-}
-tb.typ.pract() 
-
-
-tb.typ.clim <- function(){
-  
-  typologies <- c(
-    'Hybrid sun',
-    'Hybrid shade',
-    'Amazonia'
-  )
-  
-  cli.dat <- data.frame()
-  cli.dat <- 0
-  
-  for (T in typologies){
+    start.az <-  end.hsn +1 
+    end.az <- 3 * length(cor.data.var.names)
     
-    v1 <- 'precip'
-    v2 <- 'temp.mmm'
-    v3 <- 'elev'
-    v4 <- 'water.log.bool'
+    cor.interg[seq(  start.hs  : end.hs  ), 'typology'] <- 'Hybrid sun'
+    cor.interg[   seq( start.hsn   ,  end.hsn)  , 'typology'] <- 'Hybrid shade'
+    cor.interg[   seq( start.az   ,    end.az)  , 'typology'] <- 'Amazonia'
     
-    v0.dat <- data.frame()
-    v1.dat <- data.frame()
-    v2.dat <- data.frame()
-    v3.dat <- data.frame()
-    v4.dat <- data.frame()
-
-    v0.dat <- 0
-    v1.dat <- 0
-    v2.dat <- 0 
-    v3.dat <- 0 
-    v4.dat <- 0 
-
+    row.count <- 1
     
-    comp$typ <- as.numeric((comp$typ))
+    for (r in seq(1:(num.typologies))  ) { 
+      
+      for (n in 1:length(cor.data.var.names)) {
+        
+        cor.interg[row.count,'variable.name']  <-  cor.data.var.names[n]
+        cor.interg[row.count,'variable.label']  <-   cor.data.var.labels[n]
+        cor.interg[row.count,'variable.cat']  <-  cor.data.variable.cats[n]
+        
+        
+        
+        current.typology <-   cor.interg[row.count, 'typology']
+        
+        typ.mn.val <-         mean(na.omit(comp[ comp$typology == current.typology & !is.na(comp$typology)  ,      cor.data.var.names[n] ]))
+        
+        other.typologies.str <- unique( comp[comp$typology != current.typology  & !is.na(comp$typology), 'typology'])
+        
+        sys.mean.val  <- 0 
+        
+        for (t in 1:length(   other.typologies.str)) {
+          sys.mean.val  %+=% mean(na.omit(comp[ comp$typology  %in%   other.typologies.str & comp$typology != current.typology & !is.na(comp$typology) ,  cor.data.var.names[n]])) 
+        }
+        
+        sys.mean.val <-  sys.mean.val / length( other.typologies.str)
+        
+        
+        sys.sd.val  <- sd(na.omit(comp[ !is.na(comp$typ) & comp$typology != current.typology & !is.na(comp$typology) ,  cor.data.var.names[n]])) 
     
-    insert <<- " \u00B1 "
-    
-    if (T == "Hybrid sun") {  clust.quant <- num.clusts.hysn}
-    if (T == "Hybrid shade") {  clust.quant <- num.clusts.hysh}
-    if (T == "Amazonia") {  clust.quant <- num.clusts.amz}
-    
-    
-    for ( t in 1:clust.quant){
+        
+        if (  typ.mn.val >= 10) { dec.rd <- 0 } else if (   typ.mn.val > -100) {
+          dec.rd <- 1 }
+        mn.val <- round(typ.mn.val, dec.rd ) 
+        sd.val <- round( sys.sd.val , dec.rd )
+        
+        # If no decimals, add a decimal (to keep consistent)
+        if ( !is.na(mn.val) & nchar(mn.val) == 1 ) { mn.val <- str_c( mn.val , '.0')}
+        if ( !is.na(   sd.val) & nchar(sd.val) == 1 ) {    sd.val <- str_c(    sd.val , '.0')}
+        
+        
+        if (mean.val == '0.0' & !is.na(mean.val) & sd.val == '0.0' & !is.na(sd.val) ){
+          cor.interg[row.count, 'var.label'] <- '-'
+        } else {
+          cor.interg[row.count, 'var.label'] <- str_c(mn.val,'\n(',  sd.val , ')')
+          
+        }
+        
+        
+       
+     
+        cor.interg[row.count, 'var.v'] <- circle.size.scale *
+          (  typ.mn.val
+             -  sys.mean.val ) /    sys.mean.val 
+        
+        if ( typ.mn.val >= sys.mean.val & !is.na( sys.mean.val ) & !is.na( typ.mn.val ))  {      cor.interg[row.count,'dir.d']  <- 1 }  
+        if ( typ.mn.val < sys.mean.val & !is.na( sys.mean.val ) & !is.na( typ.mn.val ))  {      cor.interg[row.count,'dir.d']  <- -1 }  
+        
+        g1 <- na.omit(comp[ comp$typology ==    current.typology & !is.na(comp$typology), cor.data.var.names[n] ])
+        g2 <- na.omit(comp[ comp$typology !=    current.typology & !is.na(comp$typology), cor.data.var.names[n] ])
+        
+        
+        if (length(g1) > 0 & length(g2) > 0  & mean(g1) != mean(g2)){
+          
+          
+          t.test.res <- wilcox.test(g1, g2, alternative = "two.sided" , var.equal = FALSE)
+          cor.interg[row.count, 'var.s']     <- t.test.res$p.value
+          
+        } else {
+          cor.interg[row.count, 'var.s']  <-  runif(1,0.3,0.95)
+          
+        }
+        
+        print(paste(n))
+        row.count <-   row.count + 1 
+        
+      }
       
-      tp <- t
-      
-      ids <- comp[!is.na(comp$typ.str) & comp$typ.str == tp & (comp$typology == T) , 'hhID'] 
-      
-      # Variable 0
-      v0 <- nrow( comp[(comp$hhID %in% ids ) , ] )
-      
-      v0.dat <- append(v0.dat ,  v0 )
-      
-      # Variable 1
-      v1.m <- mean( na.omit(T.df[(T.df$hhID %in% ids ) , v1] ))
-      v1.sd <- sd( na.omit(T.df[(T.df$hhID %in% ids ) , v1] ))
-      
-      if (length(ids) == 1) {  v1.m <- T.df[(T.df$hhID %in% ids ) , v1] 
-      v1.sd <- 0}
-      
-      v1.m <- round( v1.m , 1)
-      v1.sd <- round( v1.sd , 1) 
-      
-      v1.d <- str_c(v1.m , insert , v1.sd )
-      v1.dat <- append(v1.dat ,  v1.d )
-      
-      # Variable 2
-      v2.m <- mean( na.omit(T.df[(T.df$hhID %in% ids ), v2] ))
-      v2.sd <- sd( na.omit(T.df[(T.df$hhID %in% ids ) , v2] ))
-      
-      if (length(ids) == 1) {  v2.m <- T.df[(T.df$hhID %in% ids ) , v2] 
-      v2.sd <- 0}
-      
-      v2.m <- round( v2.m , 2)
-      v2.sd <- round( v2.sd , 2) 
-      
-      v2.d <- str_c(v2.m , insert , v2.sd )
-      v2.dat <- append(v2.dat ,  v2.d )
-      
-      # Variable 3
-      v3.m <- mean( na.omit(T.df[(T.df$hhID %in% ids ) , v3] ))
-      v3.sd <- sd( na.omit(T.df[(T.df$hhID %in% ids ) , v3] ))
-      
-      if (length(ids) == 1) {  v3.m <- T.df[(T.df$hhID %in% ids ) , v3] 
-      v3.sd <- 0}
-      
-      v3.m <- round( v3.m , 0)
-      v3.sd <- round( v3.sd , 0) 
-      
-      v3.d <- str_c(v3.m , insert , v3.sd )
-      v3.dat <- append(v3.dat ,  v3.d )
-      
-      # Variable 4
-      v4.m <- 100* mean( na.omit(T.df[(T.df$hhID %in% ids ) , v4] ))
-      v4.sd <- 100*sd( na.omit(T.df[(T.df$hhID %in% ids ) , v4] ))
-      
-      if (length(ids) == 1) {  v4.m <- T.df[(T.df$hhID %in% ids ) , v4] 
-      v4.sd <- 0}
-      
-      v4.m <- round( v4.m , 0)
-      v4.sd <- round( v4.sd ,0) 
-      
-      v4.d <- str_c(v4.m )
-      v4.dat <- append(v4.dat ,  v4.d )
- 
     }
     
-    v1.dat <-  v1.dat[ -c(1)]
-    v2.dat <-  v2.dat[ -c(1)]
-    v3.dat <-  v3.dat[ -c(1)]
-    v4.dat <-  v4.dat[ -c(1)]
     
-    dat <- cbind(
-      v3.dat,
-      v2.dat,
-      v1.dat,
-      v4.dat
-    )
+    cor.interg[ !is.na(cor.interg$var.s) , 'var.s.c' ] <- (cor.interg[  !is.na(cor.interg$var.s) , 'var.s' ] ) /   sign.thresh
+    cor.interg[ !is.na(cor.interg$var.s) & cor.interg$var.s >=   sign.thresh , 'var.s.c' ] <- 1.0
     
-    cli.dat <- rbind(cli.dat,dat)
+    cor.interg[ !is.na(cor.interg$var.s.c) & cor.interg$var.s.c >= 1, 'var.s.c' ] <- 1.0
     
-  
+    
+    
+    
+    lev <- c()
+    
+    for (r in 1:nrow(cor.interg)){
+      
+      #  if (cor.interg[r,'dir.d'] < 0.0) {   new <- 'dark'}
+      #  if (cor.interg[r,'dir.d'] > 0.0) {   new <- 'dark'}
+      
+      new <- 'dark'
+       if (cor.interg[r,'var.s.c']  <= 0.6 & cor.interg[r,'dir.d'] < 0  & !is.na(cor.interg[r,'var.s.c']) & !is.na(cor.interg[r,'dir.d'])) {   new <- 'light'}
+      #  if (cor.interg[r,'var.s.c']  <= 0.6 & cor.interg[r,'dir.d'] > 0) {   new <- 'dark'}
+     
+       lev <- c( lev, new)
+      
+      
+    }
+    
+    lev <<- lev
+    
+    
+   ordered.dir.d <- c('1','-1')
+   #  ordered.dir.d.str <- c('-ve','+ve')
+    ordered.dir.d.str <- c('Lower', 'Higher')
+    
+    cor.interg[cor.interg$dir.d == -1,'dir.d.str']<- 'Lower'
+    cor.interg[cor.interg$dir.d == 1,'dir.d.str']<- 'Higher'
+    
+    cor.interg$typology <- factor( cor.interg$typology   , levels= ordered.typologies)
+    cor.interg[,'variable.name'] <- factor(  cor.interg[,'variable.name'] , levels =     cor.data.var.names )
+    
+    cor.interg[,'variable.label'] <- factor(  cor.interg[,'variable.label'] , levels =     rev(cor.data.var.labels ))
+    
+    cor.interg[,'dir.d'] <- factor(  cor.interg[,'dir.d'] , levels = ordered.dir.d)
+    cor.interg[,'dir.d.str'] <- factor(  cor.interg[,'dir.d.str'] , levels = ordered.dir.d.str)
+    cor.interg[,'variable.cat'] <- factor(  cor.interg[,'variable.cat'] , levels =    variable.cats.ordered )
+    rc <- 1 
+    
+    # cor.interg$var.s.r <- as.double(sprintf(1.00000000000000000000 - cor.interg$var.s, fmt = '%#.17f') )
+    
+    
+    # cor.interg[ cor.interg$var.s >= 0.1  & !is.na(cor.interg$var.s) , 'var.s' ] <- 0.1
+    
+    # cor.interg[ !is.na(cor.interg$var.s.r) , 'var.s.r' ] <- (cor.interg[  !is.na(cor.interg$var.s.r) , 'var.s.r' ] - 0.900) / 0.10000
+    #  cor.interg[ cor.interg$var.s.r < 0.0  & !is.na(cor.interg$var.s.r) , 'var.s.r' ] <- 0.0
+    
+    
+    cor.interg$var.sign.label <- round( cor.interg$var.s , 2)
+    cor.interg[cor.interg$var.sign.label == 0 , 'var.sign.label' ] <- "<0.01"
+    
+    cor.interg$Facet.label <- 'All systems'
+    
+    cor.interg <<- cor.interg
+    
+    
   }
-  
-  cli.dat <- cli.dat[-c(1),]
- # cli.dat <- na.omit(cli.dat)
-  
-  colnames(cli.dat) = c('Altitude',
-                        'Max temp',
-                        'Rainfall',
-                       'Water logging')
+  cor.plot.data.prep.inter()
   
   
-  path_out = '.\\Figures.out\\'
-  fileName = paste(path_out, 'table_typology_clim.csv',sep = '')
-  write.csv.utf8.BOM(  cli.dat  ,   file =   fileName )  # Export
-  #View(cli.dat)
+  p.corr.intrag.mg.bottom <- -0.02
+  p.corr.intrag.mg.top <- 0.12
+  p.corr.intrag.mg.right <- 0.1
+  p.corr.intrag.mg.left <- 0.3
+  
+  p.corr.interg.mg.bottom <- 1.10
+  p.corr.interg.mg.top <- 0.12
+  p.corr.interg.mg.right <- -.45
+  p.corr.interg.mg.left <- 0.16
+  
+  cor.plot.x.tx.fs <<- 8
+  cor.plot.y.tx.fs <<- 7.9
+  corr.plot.label.fs <<- 10.9
+  corr.plot.base.alpha <- 0.205
+  cor.plot.point.shape.id <<- 22
+  p.corr.strip.tx.fs <<- 8.4
+  p.corr.y.tit.fs <- 11
+  cor.plot.main.point.size <<- 7.06
+  cor.plot.sm.point.size <<-  8.68
+  cor.plot.sm.label.fs <<- 2.12 #1.565
+  cor.plot.mn.label.fs <<- 1.8
+  cor.plot.text.lh <<- 0.81
+  cor.plot.strip.tx.fs.left <<- 8.8
+  
+  p.corr.strip.tx.angle <<- 29.8
+  p.cor.geom.label.text.alpha.level <<- 0.77
+  cor.plot.border.thickness <<- 0.66
+  
+  cor.plot.text.color.light <<- '#FEFE14'
+  cor.plot.text.color.dark <<- 'black'
+  
+  
+  cor.plot.text.color.light <<- 'grey'
+  cor.plot.text.color.dark <<- 'grey'
+  
+  cor.plot.leg.key.h <<- 0.001
+  cor.plot.leg.key.w  <<- 0.001
+  cor.plot.leg.key.size  <<- 4
+  
+  cor.plot.leg.tx.fs <<- 7
+  
+  cor.plot.stroke.size <<- 0.0000037
+  cor.plot.panel.spaces <<- 0.1
+  
+  p.cor.fg.y.tx.margin.top <<- 2.9
+  p.cor.fg.y.tx.margin.right <<- 2
+  p.cor.fg.y.tx.margin.bottom <<- 2.9
+  p.cor.fg.y.tx.margin.left <<- 2
+  
+  cor.plot.leg.pos.y <<- -0.008
+  cor.plot.leg.pos.x <<- - 0.060468
+  
+  dir.d.neg.color <- '#87b5eb'  #   '#9D4DCA' #F46D43'
+  dir.d.pos.color <-  '#AEDB2D' # '#ABDDA4'
+  
+  fig.cor.sm.intrag.b <<- ggplot( data = cor.intrag[ !is.na(cor.intrag$var.v) &  !is.na(cor.intrag$var.s.c) , ] ,aes(  y = as.factor(variable.label.2r) ,  x = as.factor(name.2r)))+
+   geom_point(shape = cor.plot.point.shape.id ,  stroke = cor.plot.stroke.size ,   size = cor.plot.sm.point.size , aes( alpha =  var.s.c , y = variable.label.2r ,  fill = factor(dir.d.str)) , stat = 'identity') +
+    #  geom_point(shape = cor.plot.point.shape.id,  stroke = cor.plot.stroke.size , alpha =  corr.plot.base.alpha,  size =  cor.plot.point.size , aes(  y =variable.label.2r  ,  fill = factor(dir.d.str)) , stat = 'identity') + 
+    scale_alpha_continuous( breaks = c( 0.01 , 0.1 , 0.5 , 0.999  ),
+            range = c( 1.0 ,corr.plot.base.alpha ), 
+          limits= c( 0.0 , 1.0)
+    )  +
+    scale_fill_manual(values=c(   dir.d.neg.color , dir.d.pos.color  ))  +
+    facet_grid( variable.cat ~ typology      , scales = 'free' ,
+                space='free' , 
+                switch = "y"  
+    )  +
+      geom_text(alpha =  p.cor.geom.label.text.alpha.level  , lineheight =   cor.plot.text.lh ,   size =  cor.plot.label.fs ,  aes(y = variable.label.2r , label =  var.label  )  ) +
+    scale_y_discrete(position = "right" ,
+                     limits = rev ) +
+    scale_x_discrete(  ) +
+      ylab('       Plot characteristics')  +
+       xlab('Systems, clusters             ')  +
+    # xlab('')  +
+    theme(
+      plot.margin = unit(c(p.corr.intrag.mg.top , p.corr.intrag.mg.right , p.corr.intrag.mg.bottom , p.corr.intrag.mg.left), "cm"), 
+      # Facets
+      strip.background.y =  element_blank(),
+      strip.text.y =   element_blank(),
+   strip.text.x = element_text( face = 'italic' , margin = margin ( p.cor.fg.y.tx.margin.top , p.cor.fg.y.tx.margin.right, p.cor.fg.y.tx.margin.bottom, p.cor.fg.y.tx.margin.left ),
+   size =  p.corr.strip.tx.fs, color = 'black'),
+      strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
+      panel.spacing.y = unit(cor.plot.panel.spaces , "lines") , 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = 'transparent'),
+      panel.border = element_rect(colour = "black", fill = NA, size= cor.plot.border.thickness ),
+      #  axis.ticks.y = element_blank(),
+      axis.text.x = element_text(size = cor.plot.x.tx.fs , angle=78 , vjust = .7, hjust=.62 , face = 'italic'),
+      axis.text.y = element_text(size = cor.plot.y.tx.fs ), 
+      axis.title.y = element_text(size = p.corr.y.tit.fs  ,  vjust = 0, hjust=0.5) , 
+      axis.title.x = element_text(size = p.corr.y.tit.fs , hjust=0.5 , vjust = 1),
+      #axis.ticks.x = element_blank() ,
+      legend.position="none",
+      legend.text = element_text(size=7))
+  
+ 
+  
+  fig.cor.sm.interg.b <<- ggplot( data = cor.interg[ !is.na(cor.interg$var.v) &  !is.na(cor.interg$var.s.c) , ] ,aes(  y = factor(variable.label) ,  x = as.factor(typology)))+
+      geom_point(shape = cor.plot.point.shape.id ,  stroke = cor.plot.stroke.size  ,   size = cor.plot.sm.point.size  , aes( alpha =  var.s.c , y = variable.label  ,  fill = factor(dir.d.str)) , stat = 'identity') +
+    #  corr.plot.base.alpha  geom_point(shape = cor.plot.point.shape.id,  stroke = cor.plot.stroke.size , alpha =  corr.plot.base.alpha,  size = cor.plot.point.size , aes(  y = variable.label  ,  fill = factor(dir.d.str)) , stat = 'identity') +
+    scale_fill_manual(values = c(  dir.d.neg.color , dir.d.pos.color ),
+                      name = 'Direction\nof change')  +
+    scale_alpha_continuous( name = 'p-value',
+                            breaks = c( 0.01  , 0.25   , 0.75 , 1.0  ),
+                            range = c( 1.000 ,  corr.plot.base.alpha ), 
+                            labels = c('0.01' , '0.025' , '0.075' , '>= 0.1') , 
+                            limits= c( 0.0000 , 1.0) 
+    ) +
+    geom_text(alpha =  p.cor.geom.label.text.alpha.level  , lineheight =   cor.plot.text.lh ,   size =  cor.plot.label.fs ,  aes(y = variable.label , label =  var.label  )  ) +
+    scale_color_identity( labels= levels(cor.interg$var.s.c) , 
+                          breaks= c(cor.plot.text.color.dark, cor.plot.text.color.light)) +
+   facet_grid( variable.cat ~  Facet.label   , scales = 'free' ,  space='free' ,  switch = "y"  , labeller = label_wrap_gen(width=15)) + 
+  scale_y_discrete(position = "right"  ) +
+    scale_x_discrete(
+   ) +
+    ylab('')  +
+    xlab('')  +
+    guides(
+      fill = guide_legend( reverse = TRUE , 
+                           title.hjust = 0.5 , 
+                           override.aes = list(size = cor.plot.leg.key.size*.8) 
+                           ,  title="Deviation from\nsystem (a) & \ncluster (b) mean"
+                           , order = 1 , nrow = 2 , title.position = 'top'),
+      alpha = guide_legend(  title="Statistical\nsignifiance\n(Wilcoxon\nrank test)" ,
+                             order=2 , override.aes = list(size = cor.plot.leg.key.size*.8) , nrow = 2 , title.hjust = 0.00 ,title.position = 'left')
+    ) +
+ theme(
+      plot.margin = unit(c(p.corr.interg.mg.top , p.corr.interg.mg.right , p.corr.interg.mg.bottom , p.corr.interg.mg.left), "cm"), 
+      strip.text.x.top  = element_text(size =  p.corr.strip.tx.fs , color = 'black' , margin = margin (p.cor.fg.y.tx.margin.top , p.cor.fg.y.tx.margin.right, p.cor.fg.y.tx.margin.bottom, p.cor.fg.y.tx.margin.left)),
+      strip.text.y.left = element_text(angle = p.corr.strip.tx.angle  , size = cor.plot.strip.tx.fs.left ),
+      strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
+      panel.spacing.y = unit(cor.plot.panel.spaces , "lines") , 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank(),
+      panel.border = element_rect(colour = "black", fill=NA, size = cor.plot.border.thickness),
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_text(size = cor.plot.x.tx.fs ,   angle=78 , vjust = .7, hjust=.62 , face = 'italic' )
+      , axis.text.y = element_blank()
+      #axis.ticks.x = element_blank() 
+     ,axis.title.x =  element_blank()
+      , legend.title = element_text(size = 7.0)
+      ,   legend.box="vertical"
+      , legend.spacing.y = unit(.1, 'cm')
+     , legend.margin = margin(0, 0, 0, 0)  
+      , legend.background = element_rect(fill = alpha('white', 0.0))
+      , legend.position = c(cor.plot.leg.pos.x , cor.plot.leg.pos.y)
+       ,  legend.key = element_rect(fill = "white")
+      ,  legend.key.height = unit(cor.plot.leg.key.h , 'cm')
+      , legend.key.width = unit(cor.plot.leg.key.w , 'cm')
+      ,legend.justification = c("center", "top")
+      , legend.text = element_text(size=cor.plot.leg.tx.fs)
+    )
+  
+
+  
+  fig.cor.sm.interg <<- annotate_figure( fig.cor.sm.interg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = corr.plot.label.fs )
+  
+  fig.cor.sm.intrag <<- annotate_figure( fig.cor.sm.intrag.b ,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = corr.plot.label.fs )
+  
+  
+  fig.cor.sm.plot   <<- plot_grid(  fig.cor.sm.interg, 
+                                 fig.cor.sm.intrag, 
+                                 #  align = "v", 
+                                 nrow = 1, 
+                                 ncol = 2 , 
+                                 rel_widths = c(24/100, 64/100)
+  )
+  
+  ggsave("fig.cor.sm.plot.pdf",      fig.cor.sm.plot     , path = "Figures.out", width=790, height= 902, units="px", scale=2.5  )
+  ggsave("fig.cor.sm.plot.jpeg",     fig.cor.sm.plot     , path = "Figures.out", width=790, height= 902, units="px", scale=2.5  )
+  
+  
+  p.corr.mn.intrag.mg.bottom <- -0.32
+  p.corr.mn.intrag.mg.top <- 0.12
+  p.corr.mn.intrag.mg.right <- 0.1
+  p.corr.mn.intrag.mg.left <- 0.3
+  
+  p.corr.mn.interg.mg.bottom <- 1.98
+  p.corr.mn.interg.mg.top <- 0.12
+  p.corr.mn.interg.mg.right <- -.45
+  p.corr.mn.interg.mg.left <- 0.16
+  
+  cor.plot.mn.leg.pos.x <<-  -.07
+  cor.plot.mn.leg.pos.y <<-  -.028
+  
+  cor.plot.mn.x.tx.fs  <<- 7
+  cor.plot.mn.a.x.tx.fs <- 8.6
+  cor.plot.mn.b.x.tx.fs  <<- 6.25
+  
+  cor.plot.mn.leg.key.w <<- .0018
+  cor.plot.mn.leg.key.h <<-  0.0018
+  
+  cor.plot.leg.key.size <<- 4.62
+  
+  p.corr.mn.leg.tx.fs <<- 7.08
+  p.corr.mn.leg.tit.fs <<- 7.768
+  
+
+  # MAIN text figure
+  fig.cor.mn.intrag.b <<- ggplot( data = cor.intrag[ !is.na(cor.intrag$var.v) &  !is.na(cor.intrag$var.s.c) , ] ,aes(  y = as.factor(variable.label.) ,  x = as.factor(name)))+
+    geom_point(shape = cor.plot.point.shape.id ,  stroke = cor.plot.stroke.size ,   size = cor.plot.main.point.size , aes( alpha =  var.s.c , y = variable.label ,  fill = factor(dir.d.str)) , stat = 'identity') +
+    # geom_point(shape = cor.plot.point.shape.id,  stroke = cor.plot.stroke.size , alpha =  corr.plot.base.alpha,  size =  cor.plot.point.size , aes(  y =variable.label  ,  fill = factor(dir.d.str)) , stat = 'identity') + 
+    scale_alpha_continuous( breaks = c( 0.01 , 0.1 , 0.5 , 0.999  ),
+                            range = c( 1.0 , corr.plot.base.alpha ), 
+                            limits= c( 0.0 , 1.0)
+    )  +
+    scale_fill_manual(values=c(   dir.d.neg.color , dir.d.pos.color  ))  +
+    facet_grid( variable.cat ~ typology      , scales = 'free' ,
+                space='free' , 
+                switch = "y"  
+    )  +
+    geom_text(alpha =  p.cor.geom.label.text.alpha.level  , lineheight =   cor.plot.text.lh ,   size =  cor.plot.mn.label.fs ,  aes(y = as.factor(variable.label) ,  label =  var.sign.label,  x = as.factor(name) )  ) +
+    scale_y_discrete(position = "right" ,
+                     limits = rev ) +
+    scale_x_discrete(  ) +
+    ylab('       Plot characteristics')  +
+    xlab('')  +
+    theme(
+      plot.margin = unit(c(p.corr.mn.intrag.mg.top , p.corr.mn.intrag.mg.right , p.corr.mn.intrag.mg.bottom , p.corr.mn.intrag.mg.left), "cm"), 
+      # Facets
+      strip.background.y =  element_blank(),
+      strip.text.y =   element_blank(),
+      strip.text.x = element_text( face = 'italic' , margin = margin ( p.cor.fg.y.tx.margin.top , p.cor.fg.y.tx.margin.right, p.cor.fg.y.tx.margin.bottom, p.cor.fg.y.tx.margin.left ),
+                                   size =  p.corr.strip.tx.fs, color = 'black'),
+      strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
+      panel.spacing.y = unit(cor.plot.panel.spaces , "lines") , 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = 'transparent'),
+      panel.border = element_rect(colour = "black", fill = NA, size= cor.plot.border.thickness ),
+      #  axis.ticks.y = element_blank(),
+      axis.text.x = element_text(size = cor.plot.mn.x.tx.fs , angle=90 , vjust = .7, hjust= 1 , face = 'italic'),
+      axis.text.y = element_text(size = cor.plot.y.tx.fs ), 
+      axis.title.y = element_text(size = p.corr.y.tit.fs  ,  vjust = 0, hjust=0.5) , 
+      axis.title.x = element_text(size = p.corr.y.tit.fs , hjust=0.5 , vjust = 1),
+      axis.ticks.x = element_blank() ,
+      legend.position="none",
+      legend.text = element_text(size=p.corr.mn.leg.tx.fs))
+  
+  
+  
+  fig.cor.mn.interg.b <<- ggplot( data = cor.interg[ !is.na(cor.interg$var.v) &  !is.na(cor.interg$var.s.c) , ] ,aes(  y = factor(variable.label) ,  x = as.factor(typology)))+
+    geom_point(shape = cor.plot.point.shape.id ,  stroke = cor.plot.stroke.size*0  ,   size = cor.plot.main.point.size  , aes( alpha =  var.s.c , y = variable.label  ,  fill = factor(dir.d.str)) , stat = 'identity') +
+    #   geom_point(shape = cor.plot.point.shape.id,  stroke = cor.plot.stroke.size*0 , alpha =  corr.plot.base.alpha,  size = cor.plot.point.size , aes(  y = variable.label  ,  fill = factor(dir.d.str)) , stat = 'identity') +
+    scale_fill_manual(values = c(  dir.d.neg.color , dir.d.pos.color ),
+                      name = 'Direction\nof change')  +
+    scale_alpha_continuous( name = 'p-value',
+                            breaks = c( 0.01  , 0.25   , 0.75 , 1.0  ),
+                            range = c( 1.000 ,  corr.plot.base.alpha ), 
+                            labels = c('p < 0.01' , 'p < 0.025' , 'p < 0.075' , 'p > 0.1') , 
+                            limits= c( 0.0000 , 1.0) 
+    ) +
+    geom_text(alpha =  p.cor.geom.label.text.alpha.level  , lineheight =   cor.plot.text.lh*1 ,   size =  cor.plot.mn.label.fs,  aes(y = as.factor(variable.label) ,  label =  var.sign.label,   x = as.factor(typology) )  ) +
+    scale_color_identity( labels= levels(cor.interg$var.s.c) , 
+                          breaks= c(cor.plot.text.color.dark, cor.plot.text.color.light)) +
+    facet_grid( variable.cat ~  Facet.label   , scales = 'free' ,  space='free' ,  switch = "y"  , labeller = label_wrap_gen(width=15)) + 
+    scale_y_discrete(position = "right"  ) +
+    scale_x_discrete(
+    ) +
+    ylab('')  +
+    xlab('')  +
+    theme(
+      plot.margin = unit(c(p.corr.mn.interg.mg.top , p.corr.mn.interg.mg.right , p.corr.mn.interg.mg.bottom , p.corr.mn.interg.mg.left), "cm"), 
+      strip.text.x.top  = element_text(size =  p.corr.strip.tx.fs , color = 'black' , margin = margin (p.cor.fg.y.tx.margin.top , p.cor.fg.y.tx.margin.right, p.cor.fg.y.tx.margin.bottom, p.cor.fg.y.tx.margin.left)),
+      strip.text.y.left = element_text(angle = p.corr.strip.tx.angle  , size = cor.plot.strip.tx.fs.left ),
+      strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
+      panel.spacing.y = unit(cor.plot.panel.spaces , "lines") , 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank(),
+      panel.border = element_rect(colour = "black", fill=NA, size = cor.plot.border.thickness),
+      axis.ticks.y = element_blank(),
+      axis.text.x = element_text(size =   cor.plot.mn.a.x.tx.fs ,   angle=90 , vjust = .7, hjust=1 , face = 'italic' )
+      , axis.text.y = element_blank()
+      , axis.ticks.x = element_blank() 
+      ,axis.title.x =  element_blank()
+      , legend.title = element_text(size = p.corr.mn.leg.tit.fs )
+      ,   legend.box="vertical"
+      , legend.margin = margin(0, 0, 0, 0)  
+      , legend.background = element_rect(fill = alpha('white', 0.0))
+      , legend.position = c(cor.plot.mn.leg.pos.x , cor.plot.mn.leg.pos.y)
+       ,  legend.key = element_rect( size = unit(0.015, 'lines') ,  fill = "white")
+       ,  legend.key.height = unit(cor.plot.mn.leg.key.h*10 , 'mm')
+       , legend.key.width = unit(cor.plot.mn.leg.key.w , 'mm') 
+      ,legend.spacing.y = unit(1, 'mm') 
+      ,legend.justification = c("center", "top")
+       , legend.spacing.x = unit(0.03668, 'mm')
+      , legend.text = element_text(size = p.corr.mn.leg.tx.fs) 
+    ) +
+    guides(
+      fill = guide_legend( reverse = TRUE , 
+                           title.hjust = 0.37 , 
+                           override.aes = list(  size =   cor.plot.leg.key.size) 
+                         ,  title="Deviation from\nsystem (a) &\ncluster (b) mean"
+                           , order = 1 , nrow = 2 , title.position = 'top'),
+      alpha = guide_legend(        title="Statistical\nsignifiance\n(Wilcoxon\nrank test)" 
+                                      , override.aes = list(  size =   cor.plot.leg.key.size*.88)
+                                   ,order=2 ,
+                                   label.theme = element_text(size = p.corr.mn.leg.tx.fs*.78)
+                                   ,nrow = 3 , title.hjust = 0.09 ,  title.position = 'left')
+    ) 
+  
+  
+  
+  fig.cor.mn.interg <<- annotate_figure( fig.cor.mn.interg.b ,   fig.lab = "a", fig.lab.pos ="top.left", fig.lab.size = corr.plot.label.fs )
+  
+  fig.cor.mn.intrag <<- annotate_figure( fig.cor.mn.intrag.b ,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = corr.plot.label.fs )
+  
+  
+  fig.cor.mn.plot   <<- plot_grid(  fig.cor.mn.interg, 
+                                 fig.cor.mn.intrag, 
+                                 #  align = "v", 
+                                 nrow = 1, 
+                                 ncol = 2 , 
+                                 rel_widths = c(22/100, 60/100)
+  )
+  
+  
+  ggsave("fig.cor.mn.plot.pdf",      fig.cor.mn.plot    , path = "Figures.out", width = 740 , height = 802, units="px", scale=2.5  )
+  ggsave("fig.cor.mn.plot.jpeg",      fig.cor.mn.plot   , path = "Figures.out", width = 790, height = 880, units="px", scale=2.5  )
   
 }
-tb.typ.clim() 
+corr.plot.gen()
+
+
+fig.cor.plot 
+
+
+
 
 
 # ~ ~ ADDITIONAL  FIGURES
 # ~ Biomass figure
 
 biom.tree.bio <- function(){
+  
+  
+  setwd(cc.typ.dir)
+  
+View(organics.tree.all)
 
 # TREE BIOMASS FIGURES
 organics.tree.all <- organics.tree 
@@ -2289,13 +2614,44 @@ organics.tree.all$total.biomass.Mg.per.tree.sd.abs <- (organics.tree.all$total.b
 
 tree.type.order <- c('Evergreen' , 'Deciduous')
 
+max.char <- max(nchar(organics.tree.all[,'sci.name']))
+organics.tree.all[,'sci.name'] <-format(organics.tree.all[,'sci.name'], width = max.char, justify = "right") 
+
+
 
 organics.tree.all <- organics.tree.all[ order(organics.tree.all$total.biomass.Mg.per.tree),]
 
 organics.tree.all[,'sci.name'] <-  factor(organics.tree.all[,'sci.name'] , levels = organics.tree.all[,'sci.name'])
 organics.tree.all[,'Tree.type'] <- factor(organics.tree.all[,'Tree.type'] , levels = tree.type.order)
 
+
+
+organics.tree.all[,'y.label'] <- NA
+organics.tree.all[,'y.label.v.just'] <- 0
+organics.tree.all[,'num.obsvs'] <- 10
+organics.tree.all[organics.tree.all$tree.name == 'Edinam','y.label.v.just'] <- 29.7
+organics.tree.all[organics.tree.all$tree.name == 'Yellow-wood','y.label.v.just'] <- 18
+
+organics.tree.all[,'num.obsvs.str'] <- NA
+
+for (r in 1:nrow(organics.tree.all)){
   
+  if (organics.tree.all[r,'total.biomass.Mg.per.tree'] > 30){
+    
+    organics.tree.all[r,'y.label'] <-  round(organics.tree.all[r,'total.biomass.Mg.per.tree'] , 1)
+    
+  }
+  
+  current.id <-  organics.tree.all[r , 'index']
+  current.tree.count.var <- str_c('total_tree_count_id_',  current.id)
+  organics.tree.all[r,'num.obsvs'] <- tree.dat[1 , current.tree.count.var]
+  organics.tree.all[r,'num.obsvs.str'] <- str_c('n=',  organics.tree.all[r,'num.obsvs'])
+    
+   
+} 
+  
+
+
 # Settings for figure
 tree.sizes.x.tick.fs <- 9.5
 tree.sizes.bar.width <-  0.4275
@@ -2304,335 +2660,80 @@ tree.sizes.error.bar.size <- 0.37
 tree.sizes.y.tit.fs <- 10.5
 tree.sizes.y.ticks.fs <- 9
 tree.sizes.error.bar.color <-  error.bar.color
-tree.fig.strip.fs <- 10
+tree.fig.strip.fs <- 12
 tree.sizes.bar.color <- box.plot.fill.color
 
 fig.tree.mass.p.mg.top <- 0.2
-fig.tree.mass.p.mg.bottom <- 0.55
-fig.tree.mass.p.mg.right <- 0.2
+fig.tree.mass.p.mg.bottom <- -.1
+fig.tree.mass.p.mg.right <- 0.1
 fig.tree.mass.p.mg.left <- 0.2
 
+fit.tree.mass.y.lab.size <- 2.35
+fit.tree.mass.y.lab.padding <- 0.17
 
-fig.tree.mass.b <<- ggplot(organics.tree.all, aes(x = sci.name, y = total.biomass.Mg.per.tree)) +
+
+fig.tree.mass.b <<- ggplot(organics.tree.all[organics.tree.all$tree.name != 'Cocoa',], aes(x = sci.name, y = total.biomass.Mg.per.tree)) +
   geom_bar(stat="identity", fill = tree.sizes.bar.color, colour =  bar.color.border  , width =  tree.sizes.bar.width ,  position = position_dodge() ,  lwd = fig.yd.bp.thickness )+
   xlab('')+
+  geom_text(aes(x = sci.name, y = -.75 , label = num.obsvs.str), 
+            colour = 'black' ,
+            hjust = 0 ,
+            size = 2.8 ,
+            angle = 270
+            ) +
+  #geom_rect(data = organics.tree.all, aes(xmin = sci.name -.4, xmax = sci.name + .4, ymin = 8 - 3, ymax = 8 + 3), fill = "grey80") +
+  geom_label(aes(label=y.label), 
+            nudge_y = c(-19, -31.405),
+             nudge_x = c(-.1,.0), 
+           size = fit.tree.mass.y.lab.size , label.padding = unit(fit.tree.mass.y.lab.padding , "lines")) +
+ # geom_label(aes(label=num.observations), 
+  #           nudge_y = c(-31.5,-19),
+   #          nudge_x = c(.00,-.3), 
+    #         size = fit.tree.mass.y.lab.size , label.padding = unit(fit.tree.mass.y.lab.padding , "lines"),) +
   geom_errorbar(aes(ymin = total.biomass.Mg.per.tree - (total.biomass.Mg.per.tree.sd.abs  ), ymax = total.biomass.Mg.per.tree +  total.biomass.Mg.per.tree.sd.abs , x = sci.name, group = sci.name) , width=  tree.sizes.error.bar.width , size =   tree.sizes.error.bar.size ,  position=position_dodge()
                 ,color = tree.sizes.error.bar.color) +
-  ylab(bquote('Tree biomass (Mg  dry mass '*tree^-1*') ')) +
+  ylab(bquote('Tree biomass (Mg  dry mass  '*tree^-1*') ')) +
   facet_wrap( Tree.type  ~ ., ncol = 2, nrow = 1 , scales = 'free_x' )   +
-  force_panelsizes(cols = c(.8, 1)) +
-  scale_y_continuous(breaks=seq(0,60,10) , labels = scales::number_format(accuracy = 1.0))+
-  scale_x_discrete(limits = rev(levels('sci.name')))+
+  #force_panelsizes(cols = c(.8, 1)) +
+ scale_y_continuous(breaks=seq(0,30,10) , labels = scales::number_format(accuracy = 1.0) 
+                  # ,  expand = c(0.5,0.5)
+                    ) +
+ coord_cartesian(ylim=c(-6,30))+
+  scale_x_discrete(limits = rev(levels('sci.name'))) +
+                 #  ,   expand = c(0.5,0.5))
   theme(
     plot.margin = unit(c(  fig.tree.mass.p.mg.top ,   
                            fig.tree.mass.p.mg.right,
-                           fig.tree.mass.p.mg.bottom*0 -.4,  
+                           fig.tree.mass.p.mg.bottom,  
                            fig.tree.mass.p.mg.left), "cm"),
-    axis.ticks.y = element_blank(),
+  #  axis.ticks.y = element_blank(),
     axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = 270.0, vjust = 0.5, hjust=0.5, size = tree.sizes.y.ticks.fs , face = 'italic'),
-   panel.grid.major = element_blank(),
+    axis.text.x = element_text(angle = 90, vjust = .5, hjust=1, size = tree.sizes.y.ticks.fs , face = 'italic'),
+    panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.background = element_blank(),
     axis.title.y = element_text(size =   tree.sizes.y.tit.fs),
     strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
-    strip.text.x = element_text(size =  tree.fig.strip.fs, color = 'black'),
-   panel.border = element_rect(colour = "black", fill=NA, size=1))
+    strip.text.x = element_text(size =  tree.fig.strip.fs, color = 'black')
+  , panel.border = element_rect(colour = "black", fill=NA, size=1)
+    ) 
 
-ggsave("Fig_tree_mass.jpeg", fig.tree.mass.b  , path = "Figures.out", width=600, height=500, units="px", scale=2.5)
+
+
+
+ggsave("Fig_tree_mass.jpeg", fig.tree.mass.b  , path = "Figures.out", width=680, height=450, units="px", scale=3)
+
+ggsave("Fig_tree_mass.pdf", fig.tree.mass.b  , path = "Figures.out", width=680, height=450, units="px", scale=3)
+
+getwd()
 
 }
 biom.tree.bio()
-# COMPARTMENT SPECIFIC BIOMASS
-
-fig.carbon <- function(){
-# Compartment C sequestration
-
-C.remv.sum  <- data.frame()
-
-var.names <- c ('CO2.Mg.ha.yr',
-                'compartment',
-                'system')
-
-comp[comp$cc.plot.sys == 'Traditional' & !is.na(comp$cc.plot.sys) ,'cc.plot.sys'] <- 'Amazonia'
-
-length.hysn <- nrow((comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid sun' & !is.na(comp$cc.plot.sys) , ]))
-length.hysh <-nrow((comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid shade' & !is.na(comp$cc.plot.sys) , ]))
-length.amaz <-nrow((comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Amazonia' & !is.na(comp$cc.plot.sys) , ]))
-
-total.row <- length.hysn + length.hysh + length.amaz
-rows <- seq(1:total.row)
-
-C.remv.sum <- data.frame(  matrix(ncol = length(var.names), nrow = length(rows) , dimnames=list(rows  , var.names  )))
 
 
-# Cocoa
-var <- 'lc.Biomass.CO2.remv.cc.cocoa.total.Mg.ha.yr'
 
-sc.2.min <- length.hysn +1
-sc.2.max <- sc.2.min  + length.hysh - 1
-sc.3.min <- sc.2.max + 1
-sc.3.max <- sc.3.min  + length.amaz - 1
-
-C.remv.sum[1:length.hysn, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid sun' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.2.min:sc.2.max  , 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid shade' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.3.min:sc.3.max , 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Amazonia' & !is.na(comp$cc.plot.sys) , var]
-
-C.remv.sum[1:length.hysn, 'compartment'] <- 'Cocoa trees'
-C.remv.sum[(sc.2.min ):sc.2.max, 'compartment'] <- 'Cocoa trees'
-C.remv.sum[sc.3.min:sc.3.max, 'compartment'] <- 'Cocoa trees'
-
-C.remv.sum[1:length.hysn, 'system'] <- 'Hybrid sun'
-C.remv.sum[(sc.2.min ):sc.2.max, 'system'] <- 'Hybrid shade'
-C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
-
-#View(C.remv.sum)
-
-# Shade
-var <- 'lc.Biomass.CO2.remv.cc.shade.total.Mg.ha.yr'
-min.hysn <- max.hysn+ 1
-min.hysh <- max.hysh  + 1
-min.amaz <- max.amaz + 1
-max.hysn <- min.hysn + length.hysn -1
-max.hysh <- min.hysh + length.hysh - 1
-max.amaz <- min.amaz + length.amaz -1
-
-
-sc.1.min <- sc.3.max  +1
-sc.1.max <- sc.1.min  + length.hysn -1
-sc.2.min <- sc.1.max + 1
-sc.2.max <- sc.2.min  + length.hysh - 1
-sc.3.min <- sc.2.max + 1
-sc.3.max <- sc.3.min  + length.amaz - 1
-
-C.remv.sum[sc.1.min:sc.1.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid sun' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.2.min:sc.2.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid shade' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.3.min:sc.3.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Amazonia' & !is.na(comp$cc.plot.sys) , var]
-
-C.remv.sum[sc.1.min:sc.1.max, 'compartment'] <- 'Shade trees'
-C.remv.sum[sc.2.min:sc.2.max, 'compartment'] <- 'Shade trees'
-C.remv.sum[sc.3.min:sc.3.max, 'compartment'] <- 'Shade trees'
-
-C.remv.sum[sc.1.min:sc.1.max, 'system'] <- 'Hybrid sun'
-C.remv.sum[sc.2.min:sc.2.max, 'system'] <- 'Hybrid shade'
-C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
-
-# Intercrop
-var <- 'lc.Biomass.CO2.remv.cc.interc.total.Mg.ha.yr'
-min.hysn <- max.hysn +1
-min.hysh <- max.hysh+ 1
-min.amaz <- max.amaz+ 1
-max.hysn <- min.hysn + length.hysn -1
-max.hysh <- min.hysh + length.hysh - 1
-max.amaz <- min.amaz + length.amaz -1
-
-sc.1.min <- sc.3.max  +1
-sc.1.max <- sc.1.min  + length.hysn -1
-sc.2.min <- sc.1.max + 1
-sc.2.max <- sc.2.min  + length.hysh - 1
-sc.3.min <- sc.2.max + 1
-sc.3.max <- sc.3.min  + length.amaz - 1
-
-C.remv.sum[sc.1.min:sc.1.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid sun' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.2.min:sc.2.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid shade' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.3.min:sc.3.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Amazonia' & !is.na(comp$cc.plot.sys) , var]
-
-C.remv.sum[sc.1.min:sc.1.max, 'compartment'] <- 'Annual crops'
-C.remv.sum[sc.2.min:sc.2.max, 'compartment'] <- 'Annual crops'
-C.remv.sum[sc.3.min:sc.3.max, 'compartment'] <- 'Annual crops'
-
-C.remv.sum[sc.1.min:sc.1.max, 'system'] <- 'Hybrid sun'
-C.remv.sum[sc.2.min:sc.2.max, 'system'] <-  'Hybrid shade'
-C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
-
-# Fruit/other
-var <- 'lc.Biomass.CO2.remv.cc.fruit.total.Mg.ha.yr' 
-min.hysn <- max.hysn +1
-min.hysh <- max.hysh+ 1
-min.amaz <- max.amaz+ 1
-max.hysn <- min.hysn + length.hysn -1
-max.hysh <- min.hysh + length.hysh - 1
-max.amaz <- min.amaz + length.amaz -1
-
-sc.1.min <- sc.3.max  +1
-sc.1.max <- sc.1.min  + length.hysn -1
-sc.2.min <- sc.1.max + 1
-sc.2.max <- sc.2.min  + length.hysh - 1
-sc.3.min <- sc.2.max + 1
-sc.3.max <- sc.3.min  + length.amaz - 1
-
-C.remv.sum[sc.1.min:sc.1.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid sun' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.2.min:sc.2.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Hybrid shade' & !is.na(comp$cc.plot.sys) , var]
-C.remv.sum[sc.3.min:sc.3.max, 'CO2.Mg.ha.yr'] <- comp[comp$cm_crop == 1 & comp$cc.plot.sys == 'Amazonia' & !is.na(comp$cc.plot.sys) , var]
-
-C.remv.sum[sc.1.min:sc.1.max, 'compartment'] <- 'Other trees'
-C.remv.sum[sc.2.min:sc.2.max, 'compartment'] <- 'Other trees'
-C.remv.sum[sc.3.min:sc.3.max, 'compartment'] <- 'Other trees'
-
-C.remv.sum[sc.1.min:sc.1.max, 'system'] <- 'Hybrid sun'
-C.remv.sum[sc.2.min:sc.2.max, 'system'] <- 'Hybrid shade'
-C.remv.sum[sc.3.min:sc.3.max, 'system'] <- 'Amazonia'
-
-ordered.compartments <- c('Annual crops',
-                          'Cocoa trees',
-                          'Shade trees',
-                          'Other trees')
-
-C.remv.sum[ , 'system'] <- factor (C.remv.sum[ , 'system'] , ordered.typologies)
-C.remv.sum[ , 'compartment'] <- factor (C.remv.sum[ , 'compartment'] , ordered.compartments)
-
-#View(C.remv.sum)
-
-CO2r.bar.width <- compart.bmass.bar.width
-
-
-fig.co2r.x.axis.fs <- 9
-y.tit.sz <- 10
-fig.co2r.facet.tx.size <- 10.5
-box.plot.color <<- '#4a646c'
-box.plot.fill.color <<- '#a9a9a9'
-
-
-fig.compart.CO2r <<- ggplot( data = C.remv.sum ,  aes(x = system , y = CO2.Mg.ha.yr  )) +
-#  geom_bar(data = C.remv.sum[ !(C.remv.sum$compartments == 'Total') , ]  , stat = "identity", fill = bar.color , colour =  bar.color.border  , width =  CO2r.bar.width ,  position = position_dodge())+
-  xlab('')+
-  geom_boxplot(data = C.remv.sum  ,aes(y = CO2.Mg.ha.yr    ,  x = system ), outlier.shape = NA, coef = 5 , color = box.plot.color, fill = box.plot.fill.color , alpha= 0.5 , lwd = fig.yd.bp.thickness , fatten = fig.yd.bp.fatten)+
- ylab(bquote('Carbon dioxide removal (Mg  '*CO[2]*' '*ha^-1*' '*yr^-1*')'))+
-  facet_wrap( compartment ~ . , ncol = 4, nrow = 1, scales = 'free_x' )   + 
-   scale_y_continuous(breaks = seq(-15,0,3),limit = c(-15,0) ,  labels = scales::number_format(accuracy = 1.0))+
-  theme(
-    plot.margin = unit(c(p.mg.top,p.mg.right,-.3,p.mg.left), "cm"),
-    axis.ticks.x = element_blank(),
-    axis.text.x = element_text(angle = x.tick.angle , vjust = 0.5, hjust=0.5, size = fig.co2r.x.axis.fs ),
-    # axis.text.x = element_blank(),
-    axis.text.y = element_text(vjust = 0.5, hjust=0.5, size = fig.co2r.y.tick.sz ),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.background = element_blank(),
-    axis.title.y = element_text(size =  fig.co2r.y.tit.sz),
-    strip.text.x = element_text(size =  facet.tx.size, color = 'black'),
-    strip.background = element_rect(color='black', fill='white', size=1.0, linetype="solid"),
-    panel.border = element_rect(colour = "black", fill=NA, size=1)
-  )
-fig.compart.CO2r
-
-#fig.compart.CO2r <<-  annotate_figure(fig.compart.CO2r.b,   fig.lab = "b", fig.lab.pos ="top.left", fig.lab.size = fig.lab.fs, fig.lab.face = 'bold')
-
-
-#fig.bio.1 <<- plot_grid( fig.tree.mass ,   biom.incr ,  align = "v", nrow = 1, ncol = 2 ,  rel_heights = c(50/100,  50/100) , rel_widths = c(60/100,  38/100) )
-#fig.bio.2 <<- plot_grid(  fig.compart.bmass , fig.compart.CO2r,  align = "h", nrow = 2, ncol = 1 ,  rel_heights =   c(36/100,  50/100)   )
-
-#ggsave("fig.bio.C.jpeg", fig.bio.2   , path = "Figures.out", width=620, height=750, units="px", scale=2.5)
-ggsave("fig.compart.CO2r.jpeg", fig.compart.CO2r   , path = "Figures.out", width=710, height=390, units="px", scale=2.5)
 
 }
-fig.carbon()
-
-fig.compart.CO2r 
-
-# Typology data out (Export all typology data as one excel file)
-
-cols.to.include <- vr.list
-Typ.data <- comp[!is.na(comp$typ)   , c('typ' ,'typology' , 'hhID' , cols.to.include) ]
-
-climatic.vars <- c('elev',
-                   'temp',
-                   'precip',
-                   'temp.mmm',
-                   'cv_precip'
-                   )
-
-
-for (v in climatic.vars){
-  
-  col.name <- str_c('col.',v)
-  new.column <- 0
-  
-   for (r in 1:nrow(Typ.data)){
-     
-      cid <- Typ.data[r, 'hhID' ]
-      new.column <- append (new.column , bioclim.df[bioclim.df$hhID == cid , v ])
-  
-   }
-  
-  new.column <- new.column[-c(1)]
-  
-  Typ.data <- cbind(Typ.data  , new.column )
-  colnames(Typ.data)[ncol((Typ.data))] <- v
-  
-  
-  setwd(main.dir)
-}
-
-names(Typ.data)[names(Typ.data) == 'elev'] <- 'Elevation.m.asl'
-names(Typ.data)[names(Typ.data) == 'temp'] <- 'Temperature'
-names(Typ.data)[names(Typ.data) == 'precip'] <- 'Rainfall'
-names(Typ.data)[names(Typ.data) == 'temp.mmm'] <- 'Temp.mean.max.month'
-names(Typ.data)[names(Typ.data) == 'cv_precip'] <- 'Rainfall.cv'
-
-
-path_out = '.\\Figures.out\\'
-
-Typology.data.file.name = paste(path_out,'Typology_data.csv',sep = '')
-
-write.csv(T.df, Typology.data.file.name)
-
-write.csv(Typ.data  , Typology.data.file.name )
-
-
-
-
-setwd(main.dir) 
-
-} # END FIGURES CODE
-  
-gen.figures()
-  
-  
-  
-
-# Type comparisons
-fig.intrag.yg
-fig.intrag.yd.act
-
-
-fig.barintrag.ghgr.t   
-fig.bar.intrag.vop
-
-fig.yd 
-
-fig.ghg  
-fig.vop 
-
-
-# System comparisons
-fig.interg.yd.act
-fig.interg.yg
-#fig.bar.intergr.ghgr.t.b
-#fig.bar.interg.vop.b
-
-
-# Allometric results
-fig.tree.mass.b
-
-fig.compart.bmass 
-fig.compart.CO2r
-
-#Typology.data.file.name = paste(path_out, 'Typology_data.xlsx',sep = '')
-#write.xlsx(T.df, Typology.data.file.name )
-
-Typology.data.file.name = paste(path_out, 'Typology_data.csv',sep = '')
-
-
-write.csv(T.df, Typology.data.file.name )
-
-
-
-
-
-
-
-
 
 
 
